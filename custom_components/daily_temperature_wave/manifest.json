@@ -1,13 +1,13 @@
 {
   "domain": "daily_temperature_wave",
   "name": "Daily Temperature Wave",
-  "documentation": "https://github.com/minchinweb/ha-daily-temperature-wave",
-  "issue_tracker": "https://github.com/minchinweb/ha-daily-temperature-wave/issues",
-  "dependencies": [],
   "codeowners": ["@minchinweb"],
-  "requirements": [],
-  "iot_class": "calculated",
-  "version": "1.0.0",
   "config_flow": true,
-  "integration_type": "service"
+  "dependencies": [],
+  "documentation": "https://github.com/minchinweb/ha-daily-temperature-wave",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/minchinweb/ha-daily-temperature-wave/issues",
+  "requirements": [],
+  "version": "1.0.0"
 }

@@ -3,6 +3,7 @@ Core functionality tests that don't require Home Assistant.
 """
 
 import math
+
 import pytest
 
 

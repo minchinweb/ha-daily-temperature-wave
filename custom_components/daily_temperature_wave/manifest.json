@@ -6,13 +6,8 @@
   "dependencies": [],
   "codeowners": ["@minchinweb"],
   "requirements": [],
-  "iot_class": "local_polling",
+  "iot_class": "calculated",
   "version": "1.0.0",
   "config_flow": true,
-  "homeassistant": "2024.1.0",
-  "country": ["*"],
-  "description": "A custom component that generates a daily temperature wave using sine wave calculations",
-  "keywords": ["temperature", "wave", "sine", "forecast", "simulation"],
-  "license": "MIT",
-  "render_template": false
+  "integration_type": "service"
 }

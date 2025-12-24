@@ -3,6 +3,7 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/minchinweb/ha-daily-temperature-wave)
 ![GitHub last commit](https://img.shields.io/github/last-commit/minchinweb/ha-daily-temperature-wave)
 ![License](https://img.shields.io/github/license/minchinweb/ha-daily-temperature-wave)
+![GitHub Actions](https://github.com/minchinweb/ha-daily-temperature-wave/actions/workflows/python-package.yml/badge.svg)
 
 A custom Home Assistant component that generates a daily temperature wave using sine wave calculations. Perfect for simulating outdoor temperatures, testing HVAC systems, or creating dynamic temperature patterns.
 
@@ -209,9 +210,22 @@ If you see configuration errors:
 - Use valid temperature formats (e.g., "20C", "68F", or plain numbers)
 - Check that `wave_spread` is between 0.1 and 5.0
 
-## Development
+## CI/CD and Testing
 
-### Running Tests
+### GitHub Actions
+
+This project includes automated GitHub Actions workflows that run on every push and pull request:
+
+- **Python Testing**: Runs pytest on multiple Python versions (3.8, 3.9, 3.10, 3.11)
+- **Code Quality**: Checks formatting with Black and isort
+- **Linting**: Runs flake8 for code style
+- **Documentation**: Verifies all documentation files are present
+- **Demo**: Runs the demo script to verify functionality
+- **HACS Validation**: Validates the manifest.json file
+
+The workflow status is shown in the badge above. Click it to see the latest build results.
+
+### Running Tests Locally
 
 ```bash
 # Run unit tests

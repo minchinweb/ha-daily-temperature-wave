@@ -5,70 +5,36 @@
 ![License](https://img.shields.io/github/license/minchinweb/ha-daily-temperature-wave)
 ![GitHub Actions](https://github.com/minchinweb/ha-daily-temperature-wave/actions/workflows/python-package.yml/badge.svg)
 
-A custom Home Assistant component that generates a daily temperature wave using sine wave calculations. Perfect for simulating outdoor temperatures, testing HVAC systems, or creating dynamic temperature patterns.
+Provides a Daily Temperature (sine) Wave as a custom Home Assistant component.
+Can be used as a heating/cooling target.
 
-## Features
+By default, the temperature will peak at solar noon (which can be 1 1/2 or more
+from "wall clock" noon). Also provides a "step wise" version that can be used
+in lower resolution settings (e.g. setting up an Ecobee schedule, which only
+lets you set temperatures for each 1/2 hour, and only in 1&deg;F resolution).
 
-- **Sine Wave Temperature**: Smooth temperature curve peaking at solar noon
-- **Configurable Range**: Set minimum and maximum temperatures
-- **Wave Spread Control**: Adjust the slope of the temperature curve
-- **Mixed Unit Support**: Use Celsius and Fahrenheit in the same configuration
-- **Stepwise Mode**: Optional stepped temperature changes
-- **Comprehensive Forecasts**: 24-hour and 7-day forecasts
-- **Visual Curve Display**: SVG visualization of the temperature wave
-- **Rising/Falling Sensor**: Binary sensor indicating temperature trend
-- **Solar Noon Detection**: Automatic with fallback to wall clock noon
-- **WebUI Configuration**: Easy setup through Home Assistant UI
+Sensors include:
+
+- current temperature
+- rising/failing "switch"
+- 24-hour and 7-day "forecasts"
 
 ## Installation
 
-### HACS (Recommended)
+Add as a custom repo in HACS:
 
-1. **Add this repository** to HACS:
-   - Go to HACS → Integrations
-   - Click the three-dot menu → Custom repositories
-   - Add `https://github.com/minchinweb/ha-daily-temperature-wave` as a custom repository
-   - Select category "Integration"
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=minchinweb&repository=ha-daily-temperature-wave)
 
-2. **Install the integration**:
-   - Search for "Daily Temperature Wave" in HACS
-   - Click "Download"
-   - Restart Home Assistant
+Then search for "Daily Temperature Wave" in HACS and install through HACS.
 
-3. **Add the integration**:
-   - Go to Settings → Devices & Services
-   - Click "Add Integration" → Search for "Daily Temperature Wave"
-   - Follow the configuration steps
+Finally, add the integration, via Settings --> Devices & Services --> "Add
+Integration" --> Search for "Daily Temperature Wave"
 
-### Manual Installation
-
-1. **Download the component**:
-   ```bash
-   git clone https://github.com/minchinweb/ha-daily-temperature-wave.git
-   ```
-
-2. **Copy the files**:
-   ```bash
-   cp -r ha-daily-temperature-wave/custom_components/daily_temperature_wave <your_config_dir>/custom_components/
-   ```
-
-3. **Restart Home Assistant**
-
-4. **Add the integration** through the UI as described above
 
 ## Configuration
 
-### WebUI Configuration (Recommended)
-
-The component provides a full WebUI configuration flow:
-
-1. Go to Settings → Devices & Services
-2. Click "Add Integration" → Search for "Daily Temperature Wave"
-3. Fill in the configuration parameters:
-
-### YAML Configuration (Optional)
-
-You can also configure the component via `configuration.yaml`:
+It is likely easiest to configure through the Web UI, but a full YAML
+configuration would look like this:
 
 ```yaml
 daily_temperature_wave:
@@ -80,6 +46,8 @@ daily_temperature_wave:
   unit_system: metric # Unit system (metric/imperial, default: metric)
   solar_noon_override: "12:30"  # Optional: Manual solar noon override
 ```
+
+<!-- rewritten up to here.. -->
 
 ### Configuration Parameters
 
@@ -210,20 +178,7 @@ If you see configuration errors:
 - Use valid temperature formats (e.g., "20C", "68F", or plain numbers)
 - Check that `wave_spread` is between 0.1 and 5.0
 
-## CI/CD and Testing
-
-### GitHub Actions
-
-This project includes automated GitHub Actions workflows that run on every push and pull request:
-
-- **Python Testing**: Runs pytest on multiple Python versions (3.8, 3.9, 3.10, 3.11)
-- **Code Quality**: Checks formatting with Black and isort
-- **Linting**: Runs flake8 for code style
-- **Documentation**: Verifies all documentation files are present
-- **Demo**: Runs the demo script to verify functionality
-- **HACS Validation**: Validates the manifest.json file
-
-The workflow status is shown in the badge above. Click it to see the latest build results.
+## Contribution Hints
 
 ### Running Tests Locally
 
@@ -239,16 +194,6 @@ python -m unittest tests.test_core
 
 This project uses **Black** and **isort** for code formatting:
 
-```bash
-# Format code with Black
-python -m black .
-
-# Sort imports with isort
-python -m isort .
-
-# Run both formatting tools
-python -m black . && python -m isort .
-```
 
 ### Pre-commit Hooks
 
@@ -263,42 +208,9 @@ pre-commit install
 pre-commit run --all-files
 ```
 
-### Configuration Files
-
-- `pyproject.toml`: Black, isort, and other tool configurations
-- `.pre-commit-config.yaml`: Pre-commit hook configurations
-- `.gitignore`: Git ignore patterns
-
-### Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/your-feature`
-3. **Make your changes** following the existing code style
-4. **Run formatting**: `python -m black . && python -m isort .`
-5. **Write tests** for new functionality
-6. **Run tests**: Ensure all tests pass
-7. **Submit a pull request** with a clear description
-
-### Code Quality Standards
-
-- **Black** code formatting
-- **isort** import sorting
-- **Type hints** for better code clarity
-- **Comprehensive tests** for all functionality
-- **Documentation** for public APIs
-- **MIT License** compliance
-
 ## License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for the full license text.
-
-### Key Terms
-- **Free to use**: For personal and commercial projects
-- **Open source**: Source code is available and modifiable
-- **No warranty**: Software provided "as is" without guarantees
-- **Attribution**: Copyright notice must be preserved
 
 ## Support
 
@@ -310,23 +222,13 @@ For issues, questions, or feature requests:
 
 ## Changelog
 
-### 1.0.0 (Initial Release)
+### v1.0.0 -- 2025-12-24 (Initial Release)
+
 - Basic sine wave temperature generation
 - Configurable temperature range
 - WebUI configuration support
 - Multiple sensor types
 - Unit conversion support
-
-### Future Plans
-- Enhanced visualization options
-- Historical data tracking
-- Integration with weather providers
-- Custom wave shape profiles
-
-## Acknowledgements
-
-- Home Assistant community for inspiration and support
-- Open source contributors who make this possible
 
 ---
 

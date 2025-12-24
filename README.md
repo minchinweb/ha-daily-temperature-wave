@@ -21,9 +21,19 @@ Sensors include:
 
 ## Installation
 
-Add as a custom repo in HACS:
+Semi-automatically:
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=minchinweb&repository=ha-daily-temperature-wave)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=minchinweb&repository=ha-daily-temperature-wave&category=integration)
+
+[![add integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start?domain=daily_temperature_ave)
+
+or manually:
+
+Add as a [custom repository](https://hacs.xyz/docs/faq/custom_repositories/) in HACS:
+
+```test
+https://github.com/minchinweb/ha-daily-temperature-wave
+```
 
 Then search for "Daily Temperature Wave" in HACS and install through HACS.
 

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 200" width="500" height="200">
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#f0f0f0" rx="10"/>
+  
+  <!-- Sun with rays -->
+  <g transform="translate(100, 80)">
+    <!-- Sun circle -->
+    <circle cx="0" cy="0" r="30" fill="#FFD700" stroke="#FF8C00" stroke-width="2"/>
+    
+    <!-- Sun rays -->
+    <g stroke="#FF8C00" stroke-width="3" stroke-linecap="round">
+      <line x1="0" y1="-40" x2="0" y2="-60"/>
+      <line x1="28" y1="-28" x2="42" y2="-42"/>
+      <line x1="40" y1="0" x2="60" y2="0"/>
+      <line x1="28" y1="28" x2="42" y2="42"/>
+      <line x1="0" y1="40" x2="0" y2="60"/>
+      <line x1="-28" y1="28" x2="-42" y2="42"/>
+      <line x1="-40" y1="0" x2="-60" y2="0"/>
+      <line x1="-28" y1="-28" x2="-42" y2="-42"/>
+    </g>
+  </g>
+  
+  <!-- Temperature wave -->
+  <path d="M150,120 Q200,80 250,100 T350,140 T450,120" 
+        stroke="#3498db" stroke-width="4" fill="none"/>
+  
+  <!-- Current position marker -->
+  <circle cx="280" cy="110" r="8" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+  
+  <!-- Project title -->
+  <text x="250" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" 
+        text-anchor="middle" fill="#2c3e50">Daily Temperature Wave</text>
+  
+  <!-- Subtitle -->
+  <text x="250" y="65" font-family="Arial, sans-serif" font-size="16" 
+        text-anchor="middle" fill="#7f8c8d">Home Assistant Component</text>
+  
+  <!-- Decorative elements -->
+  <g transform="translate(400, 50)">
+    <circle cx="0" cy="0" r="3" fill="#3498db"/>
+    <circle cx="10" cy="10" r="2" fill="#3498db"/>
+    <circle cx="20" cy="5" r="3" fill="#3498db"/>
+  </g>
+  
+  <!-- Bottom decorative line -->
+  <line x1="50" y1="180" x2="450" y2="180" stroke="#3498db" stroke-width="2" stroke-dasharray="5,5"/>
+</svg>

@@ -1,8 +1,8 @@
 # Daily Temperature Wave - Home Assistant Custom Component
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/yourusername/ha-daily-temperature-wave)
-![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/ha-daily-temperature-wave)
-![License](https://img.shields.io/github/license/yourusername/ha-daily-temperature-wave)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/minchinweb/ha-daily-temperature-wave)
+![GitHub last commit](https://img.shields.io/github/last-commit/minchinweb/ha-daily-temperature-wave)
+![License](https://img.shields.io/github/license/minchinweb/ha-daily-temperature-wave)
 
 A custom Home Assistant component that generates a daily temperature wave using sine wave calculations. Perfect for simulating outdoor temperatures, testing HVAC systems, or creating dynamic temperature patterns.
 
@@ -26,7 +26,7 @@ A custom Home Assistant component that generates a daily temperature wave using 
 1. **Add this repository** to HACS:
    - Go to HACS → Integrations
    - Click the three-dot menu → Custom repositories
-   - Add `https://github.com/yourusername/ha-daily-temperature-wave` as a custom repository
+   - Add `https://github.com/minchinweb/ha-daily-temperature-wave` as a custom repository
    - Select category "Integration"
 
 2. **Install the integration**:
@@ -43,7 +43,7 @@ A custom Home Assistant component that generates a daily temperature wave using 
 
 1. **Download the component**:
    ```bash
-   git clone https://github.com/yourusername/ha-daily-temperature-wave.git
+   git clone https://github.com/minchinweb/ha-daily-temperature-wave.git
    ```
 
 2. **Copy the files**:
@@ -290,8 +290,8 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 For issues, questions, or feature requests:
 
-- **GitHub Issues**: Report bugs and request features
-- **Discussions**: Ask questions and share ideas
+- **GitHub Issues**: [Report bugs](https://github.com/minchinweb/ha-daily-temperature-wave/issues)
+- **Discussions**: [Ask questions](https://github.com/minchinweb/ha-daily-temperature-wave/discussions)
 - **Community Forum**: Home Assistant community forums
 
 ## Changelog

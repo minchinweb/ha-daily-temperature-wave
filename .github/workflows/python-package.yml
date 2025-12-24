@@ -1,0 +1,125 @@
+name: Python package
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-cov
+
+    - name: Test with pytest
+      run: |
+        python -m pytest tests/test_pytest_setup.py tests/test_core_pytest.py -v
+
+    - name: Upload coverage to Codecov
+      if: matrix.python-version == '3.10'  # Only upload once
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install linting dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black isort flake8
+
+    - name: Run Black
+      run: |
+        python -m black --check .
+
+    - name: Run isort
+      run: |
+        python -m isort --check .
+
+    - name: Run flake8
+      run: |
+        python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Check documentation
+      run: |
+        echo "Checking README.md exists"
+        test -f README.md
+        echo "Checking TESTING.md exists"
+        test -f TESTING.md
+        echo "Checking IMPLEMENTATION_PLAN.md exists"
+        test -f IMPLEMENTATION_PLAN.md
+        echo "All documentation files present!"
+
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Run demo script
+      run: |
+        python simple_demo.py
+
+  hacs-validation:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install HACS validation tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install hacs
+
+    - name: Validate manifest.json
+      run: |
+        python -c "
+        import json
+        with open('custom_components/daily_temperature_wave/manifest.json') as f:
+            manifest = json.load(f)
+        required_fields = ['domain', 'name', 'version', 'config_flow']
+        for field in required_fields:
+            assert field in manifest, f'Missing required field: {field}'
+        print('✅ manifest.json is valid')
+        "

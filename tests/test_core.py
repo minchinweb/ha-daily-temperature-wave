@@ -3,7 +3,7 @@ Core functionality tests that don't require Home Assistant.
 """
 
 import math
-import unittest
+import pytest
 
 
 def parse_temperature_value(value):
@@ -54,7 +54,7 @@ def calculate_sine_wave_temp(min_temp, max_temp, hours_from_noon, wave_spread=1.
     return min_temp + (max_temp - min_temp) * temp_normalized
 
 
-class TestCoreFunctionality(unittest.TestCase):
+class TestCoreFunctionality:
     """Test core functionality without any dependencies."""
 
     def test_parse_temperature_value(self):
@@ -167,4 +167,4 @@ class TestCoreFunctionality(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    pytest.main([__file__])

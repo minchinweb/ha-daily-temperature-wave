@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Home Assistant
+*.db
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
+
+# Build
+build/
+dist/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db

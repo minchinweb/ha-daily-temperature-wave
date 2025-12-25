@@ -7,7 +7,7 @@ This module provides SVG generation for the temperature curve visualization.
 import math
 from typing import Any, Dict
 
-from .const import (
+from .constants import (
     VISUAL_BACKGROUND,
     VISUAL_COLOR,
     VISUAL_CURRENT_COLOR,

@@ -18,7 +18,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
-from .const import (
+from .constants import (
     DOMAIN,
     ICON_CURRENT,
     ICON_FORECAST,

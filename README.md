@@ -35,6 +35,8 @@ Add as a [custom repository](https://hacs.xyz/docs/faq/custom_repositories/) in 
 https://github.com/minchinweb/ha-daily-temperature-wave
 ```
 
+as type "Integration".
+
 Then search for "Daily Temperature Wave" in HACS and install through HACS.
 
 Finally, add the integration, via Settings --> Devices & Services --> "Add

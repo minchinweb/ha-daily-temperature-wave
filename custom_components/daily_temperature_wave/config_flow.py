@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
-from .const import (
+from .constants import (
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
     CONF_SOLAR_NOON_OVERRIDE,

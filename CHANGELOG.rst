@@ -1,6 +1,12 @@
 Changelog
 =========
 
+- :feature:`-` The stepwise forecast sensor has a ``schedule`` attribute:
+  today, midnight to midnight, with an entry only where the temperature
+  changes, for setting up a thermostat schedule.
+- :support:`-` ``docs/dashboard.md``: cards to graph the wave against measured
+  temperatures (ApexCharts or History graph) and to show the schedule as a
+  table (Markdown).
 - :bug:`2` The integration loads: ``constants.py`` no longer fails on import,
   and the ``binary_sensor`` platform exists.
 - :bug:`1` The config flow works: a stray handler that replaced it is gone,

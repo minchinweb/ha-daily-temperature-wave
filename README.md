@@ -60,7 +60,7 @@ With the default name, the entities are:
 | `sensor.daily_temperature_wave_current`             | The wave's temperature now                                            | `solar_noon`, `hours_from_noon`, `rising`                                                           |
 | `sensor.daily_temperature_wave_current_step`        | The stepwise temperature now                                          |                                                                                                     |
 | `sensor.daily_temperature_wave_forecast_24h`        | The temperature at the start of the next hour                         | `forecast`: 24 hourly `{datetime, temperature}`                                                     |
-| `sensor.daily_temperature_wave_forecast_24h_step`   | The stepwise temperature for the next step                            | `forecast`: every step for the next 24 hours, `{datetime, temperature}`                            |
+| `sensor.daily_temperature_wave_forecast_24h_step`   | The stepwise temperature for the next step                            | `forecast`: every step for the next 24 hours, `{datetime, temperature}`; `schedule`: today's changes, `{datetime, time, temperature}` |
 | `sensor.daily_temperature_wave_forecast_7d`         | Today's high                                                          | `forecast`: 7 days of `{date, solar_noon, high, low}`                                               |
 | `sensor.daily_temperature_wave_forecast_7d_step`    | Today's high, rounded to the step                                     | as above, rounded to the step                                                                       |
 | `sensor.daily_temperature_wave_visual`              | The wave's temperature now                                            | `svg`: a small chart of today's wave; `points`: the curve, every 30 minutes                        |
@@ -68,6 +68,24 @@ With the default name, the entities are:
 
 Everything updates at the start of each minute. Forecast, chart and point
 attributes are not recorded in history.
+
+## Dashboards
+
+Graph today's wave against the temperatures you measure, and list the
+schedule to type into a thermostat. Neither needs a custom card:
+
+- **Graph**: the [ApexCharts card](https://github.com/RomRider/apexcharts-card)
+  (from HACS) plots the whole of today's wave, the stepped target and your
+  measured temperature. The built-in History graph card can compare the past
+  24 hours.
+- **Schedule table**: the built-in Markdown card lists the times the stepped
+  temperature changes, e.g. to set up an Ecobee schedule.
+
+![Sample graph: the target wave, the stepped target and measured temperatures over a day](docs/images/graph.png)
+
+*A sample, drawn from the wave's formula with made-up readings.*
+
+The card YAML for all three is in [docs/dashboard.md](docs/dashboard.md).
 
 ## Examples
 
@@ -85,17 +103,6 @@ automation:
           entity_id: climate.living_room
         data:
           temperature: "{{ states('sensor.daily_temperature_wave_current_step') | float }}"
-```
-
-List the stepped schedule for the next 24 hours, e.g. to copy into a
-thermostat app, in a Markdown card:
-
-```yaml
-type: markdown
-content: >-
-  {% for step in state_attr('sensor.daily_temperature_wave_forecast_24h_step', 'forecast') %}
-  {{ as_datetime(step.datetime).strftime('%H:%M') }}: {{ step.temperature }}°
-  {% endfor %}
 ```
 
 ## Troubleshooting

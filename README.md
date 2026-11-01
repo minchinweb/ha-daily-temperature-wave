@@ -3,7 +3,7 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/minchinweb/ha-daily-temperature-wave)
 ![GitHub last commit](https://img.shields.io/github/last-commit/minchinweb/ha-daily-temperature-wave)
 ![License](https://img.shields.io/github/license/minchinweb/ha-daily-temperature-wave)
-![GitHub Actions](https://github.com/minchinweb/ha-daily-temperature-wave/actions/workflows/python-package.yml/badge.svg)
+![GitHub Actions](https://github.com/minchinweb/ha-daily-temperature-wave/actions/workflows/test.yml/badge.svg)
 
 Provides a Daily Temperature (sine) Wave as a custom Home Assistant component.
 Can be used as a heating/cooling target.
@@ -190,39 +190,14 @@ If you see configuration errors:
 - Use valid temperature formats (e.g., "20C", "68F", or plain numbers)
 - Check that `wave_spread` is between 0.1 and 5.0
 
-## Contribution Hints
+## Contributing
 
-### Running Tests Locally
-
-```bash
-# Run unit tests
-python -m unittest tests.test_utils tests.test_sensor
-
-# Run core functionality tests
-python -m unittest tests.test_core
-```
-
-### Code Formatting
-
-This project uses **Black** and **isort** for code formatting:
-
-
-### Pre-commit Hooks
-
-The project includes pre-commit hooks for automated code quality checks:
-
-```bash
-# Install pre-commit hooks
-pip install pre-commit
-pre-commit install
-
-# Run all hooks
-pre-commit run --all-files
-```
+See [docs/development.md](docs/development.md) for the tooling, running the
+tests and trying changes in a real Home Assistant.
 
 ## License
 
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for the full license text.
+This project is licensed under the **MIT License**. See the [LICENSE.txt](LICENSE.txt) file for the full license text.
 
 ## Support
 
@@ -234,13 +209,7 @@ For issues, questions, or feature requests:
 
 ## Changelog
 
-### v1.0.0 -- 2025-12-24 (Initial Release)
-
-- Basic sine wave temperature generation
-- Configurable temperature range
-- WebUI configuration support
-- Multiple sensor types
-- Unit conversion support
+See [CHANGELOG.rst](CHANGELOG.rst).
 
 ---
 

@@ -1,4 +1,4 @@
-name: Validate
+name: Validate (HACS and hassfest)
 
 # the cron job is helpful to know if upcoming changes in Home Assistant will
 # break something
@@ -24,5 +24,5 @@ jobs:
   validate-hassfest:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: home-assistant/actions/hassfest@master

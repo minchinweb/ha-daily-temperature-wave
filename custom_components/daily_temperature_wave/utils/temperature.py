@@ -5,7 +5,7 @@ Temperature utility functions for the Daily Temperature Wave component.
 import re
 from typing import Tuple, Union
 
-from ..const import TEMP_CELSIUS, TEMP_FAHRENHEIT
+from ..constants import TEMP_CELSIUS, TEMP_FAHRENHEIT
 
 
 def parse_temperature_value(value: Union[str, int, float]) -> Tuple[float, str]:

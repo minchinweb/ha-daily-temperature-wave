@@ -7,7 +7,7 @@ import unittest
 from datetime import datetime, time
 from unittest.mock import MagicMock, patch
 
-from custom_components.daily_temperature_wave.const import (
+from custom_components.daily_temperature_wave.constants import (
     SENSOR_CURRENT,
     SENSOR_CURRENT_STEP,
     SENSOR_FORECAST_7D,

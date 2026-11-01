@@ -32,13 +32,13 @@ MORNING = "2026-01-15 15:10:00+00:00"
 
 ENTITIES = [
     "binary_sensor.daily_temperature_wave_rising",
+    "image.daily_temperature_wave_chart",
     "sensor.daily_temperature_wave_current",
     "sensor.daily_temperature_wave_current_step",
     "sensor.daily_temperature_wave_forecast_24h",
     "sensor.daily_temperature_wave_forecast_24h_step",
     "sensor.daily_temperature_wave_forecast_7d",
     "sensor.daily_temperature_wave_forecast_7d_step",
-    "sensor.daily_temperature_wave_visual",
 ]
 
 
@@ -169,17 +169,6 @@ async def test_schedule(
 def _minutes(hh_mm: str) -> int:
     hours, minutes = hh_mm.split(":")
     return int(hours) * 60 + int(minutes)
-
-
-async def test_visual(
-    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
-) -> None:
-    freezer.move_to(NOON)
-    await _setup(hass, config_entry)
-    visual = hass.states.get("sensor.daily_temperature_wave_visual")
-    assert visual.attributes["svg"].startswith("<svg")
-    assert "13:00" in visual.attributes["svg"]
-    assert len(visual.attributes["points"]) == 49
 
 
 async def test_us_customary_units(

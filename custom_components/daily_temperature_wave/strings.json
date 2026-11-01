@@ -68,8 +68,10 @@
       "forecast_24h": { "name": "Forecast 24h" },
       "forecast_24h_step": { "name": "Forecast 24h (step)" },
       "forecast_7d": { "name": "Forecast 7d" },
-      "forecast_7d_step": { "name": "Forecast 7d (step)" },
-      "visual": { "name": "Visual" }
+      "forecast_7d_step": { "name": "Forecast 7d (step)" }
+    },
+    "image": {
+      "chart": { "name": "Chart" }
     }
   }
 }

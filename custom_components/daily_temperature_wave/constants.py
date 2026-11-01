@@ -7,7 +7,7 @@ from homeassistant.const import Platform
 
 DOMAIN = "daily_temperature_wave"
 
-PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR]
+PLATFORMS = [Platform.BINARY_SENSOR, Platform.IMAGE, Platform.SENSOR]
 
 # Configuration keys
 CONF_MIN_TEMP = "min_temp"
@@ -32,7 +32,7 @@ SENSOR_FORECAST_24H = "forecast_24h"
 SENSOR_FORECAST_24H_STEP = "forecast_24h_step"
 SENSOR_FORECAST_7D = "forecast_7d"
 SENSOR_FORECAST_7D_STEP = "forecast_7d_step"
-SENSOR_VISUAL = "visual"
 BINARY_SENSOR_RISING = "rising"
+IMAGE_CHART = "chart"
 
 FORECAST_DAYS = 7

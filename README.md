@@ -63,18 +63,24 @@ With the default name, the entities are:
 | `sensor.daily_temperature_wave_forecast_24h_step`   | The stepwise temperature for the next step                            | `forecast`: every step for the next 24 hours, `{datetime, temperature}`; `schedule`: today's changes, `{datetime, time, temperature}` |
 | `sensor.daily_temperature_wave_forecast_7d`         | Today's high                                                          | `forecast`: 7 days of `{date, solar_noon, high, low}`                                               |
 | `sensor.daily_temperature_wave_forecast_7d_step`    | Today's high, rounded to the step                                     | as above, rounded to the step                                                                       |
-| `sensor.daily_temperature_wave_visual`              | The wave's temperature now                                            | `svg`: a small chart of today's wave; `points`: the curve, every 30 minutes                        |
+| `image.daily_temperature_wave_chart`                | A chart of today's wave (the state is when it was last drawn)         | `points`: today's curve, every 30 minutes, `{datetime, temperature}`                                |
 | `binary_sensor.daily_temperature_wave_rising`       | On from solar midnight to solar noon, while the temperature rises     |                                                                                                     |
 
-Everything updates at the start of each minute. Forecast, chart and point
-attributes are not recorded in history.
+Everything updates at the start of each minute, except the chart, which is
+redrawn every 5 minutes. Forecast, schedule and point attributes are not
+recorded in history.
 
 ## Dashboards
 
-Graph today's wave against the temperatures you measure, and list the
-schedule to type into a thermostat. Neither needs a custom card:
+See today's wave, graph it against the temperatures you measure, and list
+the schedule to type into a thermostat:
 
-- **Graph**: the [ApexCharts card](https://github.com/RomRider/apexcharts-card)
+- **Chart**: the chart image entity shows today's wave, its steps, solar noon
+  and now in the built-in Picture Entity card, with nothing to install.
+
+  ![The chart image: today's wave, the stepped target, solar noon and now](docs/images/chart.png)
+
+- **Compare with measured temperatures**: the [ApexCharts card](https://github.com/RomRider/apexcharts-card)
   (from HACS) plots the whole of today's wave, the stepped target and your
   measured temperature. The built-in History graph card can compare the past
   24 hours.
@@ -85,7 +91,7 @@ schedule to type into a thermostat. Neither needs a custom card:
 
 *A sample, drawn from the wave's formula with made-up readings.*
 
-The card YAML for all three is in [docs/dashboard.md](docs/dashboard.md).
+The card YAML for all of these is in [docs/dashboard.md](docs/dashboard.md).
 
 ## Examples
 

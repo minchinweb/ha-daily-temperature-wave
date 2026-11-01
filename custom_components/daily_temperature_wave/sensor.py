@@ -2,8 +2,8 @@
 """Temperature sensors: the current wave value and its forecasts.
 
 Each sensor's state is a temperature (in Celsius, which Home Assistant
-converts to the user's unit). Forecasts and the chart are attributes, in the
-user's unit, and are not recorded in history.
+converts to the user's unit). Forecasts are attributes, in the user's unit,
+and are not recorded in history.
 """
 
 from __future__ import annotations
@@ -29,7 +29,6 @@ from .constants import (
     SENSOR_FORECAST_7D_STEP,
     SENSOR_FORECAST_24H,
     SENSOR_FORECAST_24H_STEP,
-    SENSOR_VISUAL,
 )
 from .coordinator import (
     DailyForecast,
@@ -39,7 +38,6 @@ from .coordinator import (
     WaveState,
 )
 from .entity import DailyTemperatureWaveEntity
-from .visual import render_svg
 
 # the coordinator updates every entity at once; no polling
 PARALLEL_UPDATES = 0
@@ -100,13 +98,6 @@ def _current_attributes(state: WaveState, convert: Convert, unit: str) -> dict:
     }
 
 
-def _visual_attributes(state: WaveState, convert: Convert, unit: str) -> dict:
-    return {
-        "svg": render_svg(state, convert, unit),
-        "points": _timed(state.curve, convert),
-    }
-
-
 _TEMPERATURE = {
     "device_class": SensorDeviceClass.TEMPERATURE,
     "native_unit_of_measurement": UnitOfTemperature.CELSIUS,
@@ -158,13 +149,6 @@ SENSORS: tuple[WaveSensorEntityDescription, ...] = (
         attributes_fn=lambda s, c, u: {"forecast": _daily(s.daily_step, c)},
         **_TEMPERATURE,
     ),
-    WaveSensorEntityDescription(
-        key=SENSOR_VISUAL,
-        translation_key=SENSOR_VISUAL,
-        value_fn=lambda s: s.current,
-        attributes_fn=_visual_attributes,
-        **_TEMPERATURE,
-    ),
 )
 
 
@@ -184,8 +168,8 @@ class DailyTemperatureWaveSensor(DailyTemperatureWaveEntity, SensorEntity):
     """A temperature read off the wave."""
 
     entity_description: WaveSensorEntityDescription
-    # Forecasts and the chart change every minute; keep them out of history.
-    _unrecorded_attributes = frozenset({"forecast", "points", "schedule", "svg"})
+    # Forecasts change every minute; keep them out of history.
+    _unrecorded_attributes = frozenset({"forecast", "schedule"})
 
     def __init__(
         self,

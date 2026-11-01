@@ -82,9 +82,11 @@
       },
       "forecast_7d_step": {
         "name": "Forecast 7d (step)"
-      },
-      "visual": {
-        "name": "Visual"
+      }
+    },
+    "image": {
+      "chart": {
+        "name": "Chart"
       }
     }
   }

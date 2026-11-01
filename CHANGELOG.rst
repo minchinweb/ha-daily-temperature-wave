@@ -1,6 +1,10 @@
 Changelog
 =========
 
+- :feature:`-` **Breaking**: the *visual* sensor is replaced by a *chart*
+  image entity (``image.daily_temperature_wave_chart``), which the built-in
+  Picture Entity card shows: today's wave, the stepped target, solar noon and
+  now. Its ``points`` attribute is today's curve, as before.
 - :feature:`-` The stepwise forecast sensor has a ``schedule`` attribute:
   today, midnight to midnight, with an entry only where the temperature
   changes, for setting up a thermostat schedule.

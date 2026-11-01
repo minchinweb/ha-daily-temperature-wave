@@ -7,6 +7,22 @@ from HACS. The entity ids assume the default name, "Daily Temperature Wave";
 replace `sensor.living_room_temperature` with your own thermometer or
 thermostat's temperature sensor.
 
+## Today's chart (built-in Picture Entity)
+
+The integration draws its own chart of today: the wave, the stepped target,
+solar noon, and a dot for now. It's redrawn every 5 minutes.
+
+![The chart image](images/chart.png)
+
+```yaml
+type: picture-entity
+entity: image.daily_temperature_wave_chart
+show_state: false
+```
+
+It shows the target only; to compare it with what you measure, use one of
+the charts below.
+
 ## Today's wave against measured temperatures (ApexCharts)
 
 ![Sample graph: the target wave, the stepped target and measured temperatures over a day](images/graph.png)
@@ -31,7 +47,7 @@ series:
   - entity: sensor.living_room_temperature
     name: Measured
     stroke_width: 2
-  - entity: sensor.daily_temperature_wave_visual
+  - entity: image.daily_temperature_wave_chart
     name: Target wave
     stroke_width: 2
     data_generator: |

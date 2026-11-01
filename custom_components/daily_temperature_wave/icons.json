@@ -12,8 +12,10 @@
       "forecast_24h": { "default": "mdi:chart-bell-curve" },
       "forecast_24h_step": { "default": "mdi:chart-timeline-variant" },
       "forecast_7d": { "default": "mdi:calendar-week" },
-      "forecast_7d_step": { "default": "mdi:calendar-week" },
-      "visual": { "default": "mdi:chart-line" }
+      "forecast_7d_step": { "default": "mdi:calendar-week" }
+    },
+    "image": {
+      "chart": { "default": "mdi:chart-bell-curve-cumulative" }
     }
   }
 }

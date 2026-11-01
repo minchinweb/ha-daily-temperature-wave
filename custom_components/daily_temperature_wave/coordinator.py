@@ -45,7 +45,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # `astral.sun.noon`
 _SUN_EVENT_NOON = "noon"
-# Resolution of the curve drawn by the visual sensor.
+# Resolution of today's curve (the chart, and its `points` attribute).
 _CURVE_STEP = timedelta(minutes=30)
 
 type DailyTemperatureWaveConfigEntry = ConfigEntry[DailyTemperatureWaveCoordinator]

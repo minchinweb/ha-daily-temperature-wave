@@ -62,6 +62,24 @@ def _timed(points: list[TimedTemperature], convert: Convert) -> list[dict[str, A
     ]
 
 
+def _schedule(points: list[TimedTemperature], convert: Convert) -> list[dict[str, Any]]:
+    return [
+        {
+            "datetime": p.moment.isoformat(),
+            "time": p.moment.strftime("%H:%M"),
+            "temperature": convert(p.temperature),
+        }
+        for p in points
+    ]
+
+
+def _stepped_attributes(state: WaveState, convert: Convert, unit: str) -> dict:
+    return {
+        "forecast": _timed(state.stepped, convert),
+        "schedule": _schedule(state.schedule, convert),
+    }
+
+
 def _daily(days: list[DailyForecast], convert: Convert) -> list[dict[str, Any]]:
     return [
         {
@@ -123,7 +141,7 @@ SENSORS: tuple[WaveSensorEntityDescription, ...] = (
         key=SENSOR_FORECAST_24H_STEP,
         translation_key=SENSOR_FORECAST_24H_STEP,
         value_fn=lambda s: s.stepped[1].temperature,
-        attributes_fn=lambda s, c, u: {"forecast": _timed(s.stepped, c)},
+        attributes_fn=_stepped_attributes,
         **_TEMPERATURE,
     ),
     WaveSensorEntityDescription(
@@ -167,7 +185,7 @@ class DailyTemperatureWaveSensor(DailyTemperatureWaveEntity, SensorEntity):
 
     entity_description: WaveSensorEntityDescription
     # Forecasts and the chart change every minute; keep them out of history.
-    _unrecorded_attributes = frozenset({"forecast", "points", "svg"})
+    _unrecorded_attributes = frozenset({"forecast", "points", "schedule", "svg"})
 
     def __init__(
         self,

@@ -7,6 +7,7 @@ The `hass` fixture is in US/Pacific; the entry fixes solar noon at 13:00.
 from __future__ import annotations
 
 from datetime import timedelta
+from itertools import pairwise
 
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.config_entries import ConfigEntryState
@@ -140,6 +141,36 @@ async def test_forecasts(
     assert float(daily.state) == 30.0
 
 
+async def test_schedule(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    """Today's change points, midnight to midnight, whatever the time now."""
+    freezer.move_to(MORNING)
+    await _setup(hass, config_entry)
+    schedule = hass.states.get(
+        "sensor.daily_temperature_wave_forecast_24h_step"
+    ).attributes["schedule"]
+
+    times = [step["time"] for step in schedule]
+    temps = [step["temperature"] for step in schedule]
+    assert times[0] == "00:00"
+    assert times == sorted(times)
+    assert all(t[-2:] in ("00", "30") for t in times)  # on the step interval
+    assert all(a != b for a, b in pairwise(temps))  # only changes
+    # 20-30 °C in 1 °F steps: 68-86 °F, up to noon and back down; where the
+    # wave climbs over 1 °F per half hour, some degrees are skipped
+    assert (min(temps), max(temps)) == (20.0, 30.0)
+    assert 10 < len(set(temps)) <= 19
+    assert 13 * 60 >= _minutes(times[temps.index(30.0)]) >= 12 * 60
+    assert temps[times.index("07:00")] == 25.0
+    assert schedule[0]["datetime"] == "2026-01-15T00:00:00-08:00"
+
+
+def _minutes(hh_mm: str) -> int:
+    hours, minutes = hh_mm.split(":")
+    return int(hours) * 60 + int(minutes)
+
+
 async def test_visual(
     hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
 ) -> None:
@@ -163,6 +194,10 @@ async def test_us_customary_units(
     assert float(current.state) == pytest.approx(86.0)
     forecast = hass.states.get("sensor.daily_temperature_wave_forecast_7d")
     assert forecast.attributes["forecast"][0]["low"] == 68.0
+    stepped = hass.states.get("sensor.daily_temperature_wave_forecast_24h_step")
+    schedule = [step["temperature"] for step in stepped.attributes["schedule"]]
+    assert schedule == [round(t) for t in schedule]  # whole °F
+    assert max(schedule) == 86.0
 
 
 @pytest.mark.parametrize("options", [{CONF_SOLAR_NOON_OVERRIDE: None}])

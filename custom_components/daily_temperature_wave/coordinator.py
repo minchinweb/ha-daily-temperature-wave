@@ -135,6 +135,9 @@ class WaveState:
     daily_step: list[DailyForecast]
     # today, midnight to midnight, every `_CURVE_STEP`
     curve: list[TimedTemperature]
+    # today, midnight to midnight: each step where the stepped temperature
+    # changes, i.e. a thermostat schedule
+    schedule: list[TimedTemperature]
 
 
 class DailyTemperatureWaveCoordinator(DataUpdateCoordinator[WaveState]):
@@ -264,4 +267,21 @@ class DailyTemperatureWaveCoordinator(DataUpdateCoordinator[WaveState]):
             daily=daily,
             daily_step=daily_step,
             curve=curve,
+            schedule=self.schedule(midnight),
         )
+
+    def schedule(self, midnight: datetime) -> list[TimedTemperature]:
+        """The day from ``midnight``: each step where the temperature changes.
+
+        The first entry is always at midnight. Times are wall-clock, so on a
+        daylight saving change the steps still fall on the hour and half hour.
+        """
+        interval = timedelta(minutes=self.settings.step_interval)
+        changes: list[TimedTemperature] = []
+        moment = midnight
+        while moment.date() == midnight.date():
+            temp = self.stepped_temperature(moment)
+            if not changes or temp != changes[-1].temperature:
+                changes.append(TimedTemperature(moment, temp))
+            moment += interval
+        return changes

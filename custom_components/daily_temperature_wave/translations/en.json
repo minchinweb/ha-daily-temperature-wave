@@ -62,6 +62,15 @@
     "binary_sensor": {
       "rising": {
         "name": "Rising"
+      },
+      "falling": {
+        "name": "Falling"
+      },
+      "rising_step": {
+        "name": "Rising (step)"
+      },
+      "falling_step": {
+        "name": "Falling (step)"
       }
     },
     "sensor": {

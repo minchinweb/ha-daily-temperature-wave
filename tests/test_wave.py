@@ -11,6 +11,7 @@ import pytest
 from custom_components.daily_temperature_wave.wave import (
     hours_from_noon,
     interval_start,
+    is_falling,
     is_rising,
     parse_step,
     parse_temperature,
@@ -92,6 +93,13 @@ def test_temperature_at():
 )
 def test_is_rising(hours, rising):
     assert is_rising(hours) is rising
+
+
+@pytest.mark.parametrize(
+    ("hours", "falling"), [(-1, False), (0, False), (0.1, True), (11, True)]
+)
+def test_is_falling(hours, falling):
+    assert is_falling(hours) is falling
 
 
 def test_hours_from_noon_wraps():

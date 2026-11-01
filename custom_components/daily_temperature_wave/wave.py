@@ -122,6 +122,15 @@ def is_rising(hours: float) -> bool:
     return hours < 0
 
 
+def is_falling(hours: float) -> bool:
+    """Whether the temperature is falling, ``hours`` from solar noon.
+
+    It falls from solar noon to solar midnight. Both are off at the peak and
+    the trough themselves.
+    """
+    return hours > 0
+
+
 def round_to_step(temp_c: float, step: float, step_unit: str) -> float:
     """Round a Celsius temperature to the nearest ``step`` in ``step_unit``.
 

@@ -1,6 +1,10 @@
 Changelog
 =========
 
+- :feature:`-` Binary sensors for the wave's direction: ``falling`` mirrors
+  ``rising``, and ``rising_step`` and ``falling_step`` follow the stepped
+  target. The stepped ones are on only in an interval where the target
+  changes, so they stay off across the flat top and bottom of the wave.
 - :feature:`-` **Breaking**: the *visual* sensor is replaced by a *chart*
   image entity (``image.daily_temperature_wave_chart``), which the built-in
   Picture Entity card shows: today's wave, the stepped target, solar noon and

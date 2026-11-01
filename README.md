@@ -65,6 +65,9 @@ With the default name, the entities are:
 | `sensor.daily_temperature_wave_forecast_7d_step`    | Today's high, rounded to the step                                     | as above, rounded to the step                                                                       |
 | `image.daily_temperature_wave_chart`                | A chart of today's wave (the state is when it was last drawn)         | `points`: today's curve, every 30 minutes, `{datetime, temperature}`                                |
 | `binary_sensor.daily_temperature_wave_rising`       | On from solar midnight to solar noon, while the temperature rises     |                                                                                                     |
+| `binary_sensor.daily_temperature_wave_falling`      | On from solar noon to solar midnight, while the temperature falls     |                                                                                                     |
+| `binary_sensor.daily_temperature_wave_rising_step`  | On in an interval where the stepped temperature goes up               |                                                                                                     |
+| `binary_sensor.daily_temperature_wave_falling_step` | On in an interval where the stepped temperature goes down             |                                                                                                     |
 
 Everything updates at the start of each minute, except the chart, which is
 redrawn every 5 minutes. Forecast, schedule and point attributes are not

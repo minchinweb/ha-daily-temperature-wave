@@ -34,6 +34,7 @@ from .constants import (
 from .wave import (
     hours_from_noon,
     interval_start,
+    is_falling,
     is_rising,
     parse_step,
     parse_temperature_celsius,
@@ -127,6 +128,10 @@ class WaveState:
     current: float
     current_step: float
     rising: bool
+    falling: bool
+    # the stepped target moved up (or down) at the start of this interval
+    rising_step: bool
+    falling_step: bool
     # next 24 hours, on the hour
     hourly: list[TimedTemperature]
     # next 24 hours, at the start of each step interval, rounded to the step
@@ -246,6 +251,11 @@ class DailyTemperatureWaveCoordinator(DataUpdateCoordinator[WaveState]):
             for f in daily
         ]
 
+        current_step = self.stepped_temperature(now)
+        previous_step = self.stepped_temperature(
+            interval_start(now, settings.step_interval) - interval
+        )
+
         midnight = datetime.combine(today, time(), tzinfo=now.tzinfo)
         curve_points = int(timedelta(days=1) / _CURVE_STEP) + 1
         curve = [
@@ -260,8 +270,11 @@ class DailyTemperatureWaveCoordinator(DataUpdateCoordinator[WaveState]):
             current=temperature_at(
                 hours, settings.min_temp, settings.max_temp, settings.spread
             ),
-            current_step=self.stepped_temperature(now),
+            current_step=current_step,
             rising=is_rising(hours),
+            falling=is_falling(hours),
+            rising_step=current_step > previous_step,
+            falling_step=current_step < previous_step,
             hourly=hourly,
             stepped=stepped,
             daily=daily,

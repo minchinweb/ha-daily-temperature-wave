@@ -33,6 +33,10 @@ SENSOR_FORECAST_24H_STEP = "forecast_24h_step"
 SENSOR_FORECAST_7D = "forecast_7d"
 SENSOR_FORECAST_7D_STEP = "forecast_7d_step"
 BINARY_SENSOR_RISING = "rising"
+BINARY_SENSOR_FALLING = "falling"
+# the stepped target: on only in an interval where it changes
+BINARY_SENSOR_RISING_STEP = "rising_step"
+BINARY_SENSOR_FALLING_STEP = "falling_step"
 IMAGE_CHART = "chart"
 
 FORECAST_DAYS = 7

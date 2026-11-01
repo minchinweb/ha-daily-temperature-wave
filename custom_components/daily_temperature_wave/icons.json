@@ -4,6 +4,18 @@
       "rising": {
         "default": "mdi:thermometer-chevron-down",
         "state": { "on": "mdi:thermometer-chevron-up" }
+      },
+      "falling": {
+        "default": "mdi:thermometer-chevron-up",
+        "state": { "on": "mdi:thermometer-chevron-down" }
+      },
+      "rising_step": {
+        "default": "mdi:stairs",
+        "state": { "on": "mdi:stairs-up" }
+      },
+      "falling_step": {
+        "default": "mdi:stairs",
+        "state": { "on": "mdi:stairs-down" }
       }
     },
     "sensor": {

@@ -31,7 +31,10 @@ NOON = "2026-01-15 21:00:00+00:00"
 MORNING = "2026-01-15 15:10:00+00:00"
 
 ENTITIES = [
+    "binary_sensor.daily_temperature_wave_falling",
+    "binary_sensor.daily_temperature_wave_falling_step",
     "binary_sensor.daily_temperature_wave_rising",
+    "binary_sensor.daily_temperature_wave_rising_step",
     "image.daily_temperature_wave_chart",
     "sensor.daily_temperature_wave_current",
     "sensor.daily_temperature_wave_current_step",
@@ -95,6 +98,33 @@ async def test_morning(
     # held at the 07:00 value, 25 °C = 77 °F, already on a 1 °F step
     assert _temp(hass, "sensor.daily_temperature_wave_current_step") == 25.0
     assert hass.states.get("binary_sensor.daily_temperature_wave_rising").state == "on"
+
+
+async def test_stepped_direction_is_off_on_the_flats(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    # 02:00 PST, near the trough: the target is 68 °F from 01:30 to 02:00
+    freezer.move_to("2026-01-15 10:00:00+00:00")
+    await _setup(hass, config_entry)
+    states = hass.states
+    assert states.get("binary_sensor.daily_temperature_wave_rising").state == "on"
+    assert states.get("binary_sensor.daily_temperature_wave_falling").state == "off"
+    assert states.get("binary_sensor.daily_temperature_wave_rising_step").state == "off"
+    assert (
+        states.get("binary_sensor.daily_temperature_wave_falling_step").state == "off"
+    )
+
+
+async def test_stepped_direction_follows_a_change(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    # 16:00 PST: the target steps down from 84 °F to 83 °F at 16:00
+    freezer.move_to("2026-01-16 00:00:00+00:00")
+    await _setup(hass, config_entry)
+    states = hass.states
+    assert states.get("binary_sensor.daily_temperature_wave_falling").state == "on"
+    assert states.get("binary_sensor.daily_temperature_wave_falling_step").state == "on"
+    assert states.get("binary_sensor.daily_temperature_wave_rising_step").state == "off"
 
 
 async def test_updates_every_minute(

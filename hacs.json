@@ -1,3 +1,4 @@
 {
-  "name": "Daily Temperature Wave"
+  "name": "Daily Temperature Wave",
+  "homeassistant": "2025.2.0"
 }

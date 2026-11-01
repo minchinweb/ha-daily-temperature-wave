@@ -1,0 +1,91 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Daily Temperature Wave",
+        "description": "A target temperature that follows the sun: highest at solar noon, lowest at solar midnight. Temperatures accept a unit, e.g. `20C` or `68F`.",
+        "data": {
+          "name": "Name",
+          "min_temp": "Minimum temperature",
+          "max_temp": "Maximum temperature",
+          "wave_spread": "Peak sharpness",
+          "step_resolution": "Step size",
+          "step_interval": "Step interval",
+          "solar_noon_override": "Solar noon override"
+        },
+        "data_description": {
+          "name": "Used for the device and entity names.",
+          "min_temp": "Reached at solar midnight, e.g. `20C` or `68F`.",
+          "max_temp": "Reached at solar noon.",
+          "wave_spread": "1.0 is a plain sine wave. Higher values give a shorter, sharper warm peak; lower values a broader one.",
+          "step_resolution": "The stepped sensors round to this, e.g. `1F` or `0.5C`.",
+          "step_interval": "The stepped sensors hold each value this long, starting from midnight (e.g. 30 = on the hour and half hour).",
+          "solar_noon_override": "Leave empty to calculate solar noon from your Home Assistant location."
+        }
+      }
+    },
+    "error": {
+      "invalid_temperature": "Not a temperature; use a number with an optional unit, e.g. `20C` or `68F`.",
+      "invalid_step": "Use a positive number with an optional unit, e.g. `1F` or `0.5C`.",
+      "min_max_invalid": "The minimum temperature must be below the maximum."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Daily Temperature Wave options",
+        "data": {
+          "min_temp": "Minimum temperature",
+          "max_temp": "Maximum temperature",
+          "wave_spread": "Peak sharpness",
+          "step_resolution": "Step size",
+          "step_interval": "Step interval",
+          "solar_noon_override": "Solar noon override"
+        },
+        "data_description": {
+          "min_temp": "Reached at solar midnight, e.g. `20C` or `68F`.",
+          "max_temp": "Reached at solar noon.",
+          "wave_spread": "1.0 is a plain sine wave. Higher values give a shorter, sharper warm peak; lower values a broader one.",
+          "step_resolution": "The stepped sensors round to this, e.g. `1F` or `0.5C`.",
+          "step_interval": "The stepped sensors hold each value this long, starting from midnight (e.g. 30 = on the hour and half hour).",
+          "solar_noon_override": "Leave empty to calculate solar noon from your Home Assistant location."
+        }
+      }
+    },
+    "error": {
+      "invalid_temperature": "Not a temperature; use a number with an optional unit, e.g. `20C` or `68F`.",
+      "invalid_step": "Use a positive number with an optional unit, e.g. `1F` or `0.5C`.",
+      "min_max_invalid": "The minimum temperature must be below the maximum."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "rising": {
+        "name": "Rising"
+      }
+    },
+    "sensor": {
+      "current": {
+        "name": "Current"
+      },
+      "current_step": {
+        "name": "Current (step)"
+      },
+      "forecast_24h": {
+        "name": "Forecast 24h"
+      },
+      "forecast_24h_step": {
+        "name": "Forecast 24h (step)"
+      },
+      "forecast_7d": {
+        "name": "Forecast 7d"
+      },
+      "forecast_7d_step": {
+        "name": "Forecast 7d (step)"
+      },
+      "visual": {
+        "name": "Visual"
+      }
+    }
+  }
+}

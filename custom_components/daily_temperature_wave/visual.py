@@ -1,108 +1,75 @@
-"""
-Visualization component for the Daily Temperature Wave.
+# Copyright (c) 2025 William Minchin
+"""A small SVG chart of today's wave, for the visual sensor's ``svg`` attribute."""
 
-This module provides SVG generation for the temperature curve visualization.
-"""
+from __future__ import annotations
 
-import math
-from typing import Any, Dict
+from collections.abc import Callable
+from datetime import datetime
+from typing import TYPE_CHECKING
 
-from .constants import (
-    VISUAL_BACKGROUND,
-    VISUAL_COLOR,
-    VISUAL_CURRENT_COLOR,
-    VISUAL_HEIGHT,
-    VISUAL_PADDING,
-    VISUAL_WIDTH,
-)
+if TYPE_CHECKING:
+    from .coordinator import WaveState
 
-
-def generate_svg_visualization(visual_data: Dict[str, Any]) -> str:
-    """
-    Generate SVG visualization from visual data.
-
-    Args:
-        visual_data: Visualization data from sensor
-
-    Returns:
-        SVG string
-    """
-    # Extract data
-    points = visual_data.get("points", [])
-    current_position = visual_data.get("current_position", {})
-    solar_noon = visual_data.get("solar_noon", {})
-    temp_range = visual_data.get("temperature_range", {})
-
-    # Calculate dimensions
-    width = VISUAL_WIDTH
-    height = VISUAL_HEIGHT
-    padding = VISUAL_PADDING
-
-    # Create SVG path for the curve
-    path_points = []
-    for point in points:
-        x = point["x"]
-        y = point["y"]
-        path_points.append(f"{x},{y}")
-
-    path_data = "M" + " L".join(path_points)
-
-    # Create SVG
-    svg = f"""<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100%" height="100%" fill="{VISUAL_BACKGROUND}" />
-    
-    <!-- Temperature curve -->
-    <path d="{path_data}" stroke="{VISUAL_COLOR}" stroke-width="2" fill="none" />
-    
-    <!-- Current position marker -->
-    <circle cx="{current_position.get('x', 0)}" cy="{current_position.get('y', 0)}" r="6" fill="{VISUAL_CURRENT_COLOR}" />
-    <text x="{current_position.get('x', 0)}" y="{current_position.get('y', 0) - 10}" text-anchor="middle" font-size="12" fill="{VISUAL_CURRENT_COLOR}">
-        {current_position.get('temp', '?')}°
-    </text>
-    
-    <!-- Solar noon marker -->
-    <line x1="{solar_noon.get('hour', 12) * 10}" y1="{padding}" x2="{solar_noon.get('hour', 12) * 10}" y2="{height - padding}" 
-          stroke="#7f8c8d" stroke-width="1" stroke-dasharray="5,5" />
-    <text x="{solar_noon.get('hour', 12) * 10}" y="{height - 5}" text-anchor="middle" font-size="10" fill="#7f8c8d">
-        Noon
-    </text>
-    
-    <!-- Temperature labels -->
-    <text x="{padding}" y="{padding + 15}" font-size="12" fill="#2c3e50">
-        {temp_range.get('max', '?')}°{temp_range.get('unit', 'C')}
-    </text>
-    <text x="{padding}" y="{height - padding}" font-size="12" fill="#2c3e50">
-        {temp_range.get('min', '?')}°{temp_range.get('unit', 'C')}
-    </text>
-    
-    <!-- Time markers -->
-    <text x="{width - padding}" y="{height - padding}" text-anchor="end" font-size="10" fill="#7f8c8d">
-        Time →
-    </text>
-    </svg>"""
-
-    return svg
+WIDTH = 300
+HEIGHT = 150
+PADDING = 20
+CURVE_COLOR = "#3498db"
+NOW_COLOR = "#e74c3c"
+GRID_COLOR = "#7f8c8d"
+TEXT_COLOR = "#2c3e50"
 
 
-def generate_simple_visualization(visual_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Generate a simple JSON visualization for Lovelace cards.
+def _hour_of_day(moment: datetime, midnight: datetime) -> float:
+    return (moment.timestamp() - midnight.timestamp()) / 3600
+
+
+def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -> str:
+    """Draw today's curve (midnight to midnight), solar noon, and now.
 
     Args:
-        visual_data: Visualization data from sensor
+        state: The coordinator's latest calculation.
+        convert: Celsius to the unit to label the chart in.
+        unit: That unit's symbol, e.g. ``"°C"``.
 
     Returns:
-        Simplified visualization data
+        A standalone SVG document.
     """
-    return {
-        "current_temp": visual_data.get("current_position", {}).get("temp", "?"),
-        "current_hours_from_noon": visual_data.get("current_position", {}).get(
-            "hours_from_noon", 0
-        ),
-        "solar_noon": f"{visual_data.get('solar_noon', {}).get('hour', 12):02d}:{visual_data.get('solar_noon', {}).get('minute', 0):02d}",
-        "min_temp": visual_data.get("temperature_range", {}).get("min", "?"),
-        "max_temp": visual_data.get("temperature_range", {}).get("max", "?"),
-        "unit": visual_data.get("temperature_range", {}).get("unit", "C"),
-        "is_rising": visual_data.get("current_position", {}).get("hours_from_noon", 0)
-        < 0,
-    }
+    midnight = state.curve[0].moment
+    temps = [convert(p.temperature) for p in state.curve]
+    low, high = min(temps), max(temps)
+    span = (high - low) or 1.0
+    plot_w, plot_h = WIDTH - 2 * PADDING, HEIGHT - 2 * PADDING
+
+    def x(hour: float) -> float:
+        return round(PADDING + plot_w * hour / 24, 1)
+
+    def y(temp: float) -> float:
+        return round(PADDING + plot_h * (high - temp) / span, 1)
+
+    path = " ".join(
+        f"{'M' if i == 0 else 'L'}{x(_hour_of_day(p.moment, midnight))},{y(t)}"
+        for i, (p, t) in enumerate(zip(state.curve, temps, strict=True))
+    )
+    noon_x = x(_hour_of_day(state.solar_noon, midnight))
+    now_x = x(_hour_of_day(state.now, midnight))
+    now_temp = convert(state.current)
+    now_y = y(now_temp)
+
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" '
+        f'height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}">'
+        f'<line x1="{noon_x}" y1="{PADDING}" x2="{noon_x}" '
+        f'y2="{HEIGHT - PADDING}" stroke="{GRID_COLOR}" stroke-dasharray="4,4"/>'
+        f'<text x="{noon_x}" y="{HEIGHT - 5}" text-anchor="middle" '
+        f'font-size="10" fill="{GRID_COLOR}">'
+        f"{state.solar_noon:%H:%M}</text>"
+        f'<path d="{path}" stroke="{CURVE_COLOR}" stroke-width="2" fill="none"/>'
+        f'<circle cx="{now_x}" cy="{now_y}" r="4" fill="{NOW_COLOR}"/>'
+        f'<text x="{now_x}" y="{max(now_y - 8, 10)}" text-anchor="middle" '
+        f'font-size="11" fill="{NOW_COLOR}">{now_temp:.1f}{unit}</text>'
+        f'<text x="2" y="{PADDING + 4}" font-size="10" fill="{TEXT_COLOR}">'
+        f"{high:.1f}{unit}</text>"
+        f'<text x="2" y="{HEIGHT - PADDING}" font-size="10" fill="{TEXT_COLOR}">'
+        f"{low:.1f}{unit}</text>"
+        "</svg>"
+    )

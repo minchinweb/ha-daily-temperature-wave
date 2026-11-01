@@ -14,9 +14,21 @@ uv run invoke check      # lint + tests, the same as CI
 
 The tests use
 [`pytest-homeassistant-custom-component`](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component),
-which installs Home Assistant itself. Home Assistant does not support Windows,
-so on Windows run the test suite under WSL (`uv run pytest` from the repo
-inside WSL). The pure wave-math tests (`tests/test_wave.py`) run anywhere.
+which installs Home Assistant itself. Its pytest plugin needs Linux (`fcntl`),
+so on Windows run the tests under WSL. Point uv at a Linux-side virtual
+environment so it doesn't clash with the Windows `.venv`:
+
+```bash
+# inside WSL, from the repo
+export UV_PROJECT_ENVIRONMENT=~/.venvs/ha-daily-temperature-wave
+uv run pytest
+```
+
+Linting and formatting (`invoke lint`, `invoke format`) work on Windows.
+
+`translations/en.json` is generated from `strings.json` (with the
+`[%key:...%]` references filled in); after changing `strings.json`, run
+`python tests/test_translations.py` to regenerate it.
 
 ## Trying it in a real Home Assistant
 

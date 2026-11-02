@@ -50,6 +50,9 @@ Changelog
   the integration itself; the project follows MinchinWeb's Python style
   guide (ruff, uv, invoke).
 
+- :bug:`-` The chart's hour labels and grid lines line up on daylight saving
+  change days, when the day is 23 or 25 hours long.
+- :release:`2.0.1 <2026-11-01>`
 - :release:`2.0.0 <2026-11-01>`
 - :release:`1.0.0 <2025-12-24>`
 - :feature:`-` Initial release: sine-wave temperature sensors (current,

@@ -19,12 +19,14 @@ from homeassistant.util import dt as dt_util
 from .constants import (
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
+    CONF_PEAK_OFFSET,
     CONF_SOLAR_NOON_OVERRIDE,
     CONF_STEP_INTERVAL,
     CONF_STEP_RESOLUTION,
     CONF_WAVE_SPREAD,
     DEFAULT_MAX_TEMP,
     DEFAULT_MIN_TEMP,
+    DEFAULT_PEAK_OFFSET,
     DEFAULT_STEP_INTERVAL,
     DEFAULT_STEP_RESOLUTION,
     DEFAULT_WAVE_SPREAD,
@@ -74,6 +76,7 @@ class WaveSettings:
     step_unit: str
     step_interval: int  # minutes
     solar_noon_override: time | None
+    peak_offset: timedelta  # the peak is this long after solar noon
 
     @classmethod
     def from_options(cls, options: Mapping[str, Any]) -> WaveSettings:
@@ -97,6 +100,9 @@ class WaveSettings:
             step_unit=step_unit,
             step_interval=int(options.get(CONF_STEP_INTERVAL, DEFAULT_STEP_INTERVAL)),
             solar_noon_override=parse_time(options.get(CONF_SOLAR_NOON_OVERRIDE)),
+            peak_offset=timedelta(
+                minutes=float(options.get(CONF_PEAK_OFFSET, DEFAULT_PEAK_OFFSET) or 0)
+            ),
         )
 
 
@@ -124,6 +130,7 @@ class WaveState:
 
     now: datetime
     solar_noon: datetime
+    peak: datetime  # solar noon plus the peak offset
     hours_from_noon: float
     current: float
     current_step: float
@@ -202,9 +209,13 @@ class DailyTemperatureWaveCoordinator(DataUpdateCoordinator[WaveState]):
         self._noon_cache[day] = noon
         return noon
 
+    def peak(self, day: date) -> datetime:
+        """When the wave peaks on ``day``: solar noon plus the peak offset."""
+        return self.solar_noon(day) + self.settings.peak_offset
+
     def temperature(self, moment: datetime) -> float:
         """The wave's temperature (Celsius) at ``moment``."""
-        hours = hours_from_noon(moment, self.solar_noon(moment.date()))
+        hours = hours_from_noon(moment, self.peak(moment.date()))
         settings = self.settings
         return temperature_at(
             hours, settings.min_temp, settings.max_temp, settings.spread
@@ -223,7 +234,7 @@ class DailyTemperatureWaveCoordinator(DataUpdateCoordinator[WaveState]):
         settings = self.settings
         today = now.date()
         noon = self.solar_noon(today)
-        hours = hours_from_noon(now, noon)
+        hours = hours_from_noon(now, self.peak(today))
 
         hour_start = now.replace(minute=0, second=0, microsecond=0)
         hourly = [
@@ -266,6 +277,7 @@ class DailyTemperatureWaveCoordinator(DataUpdateCoordinator[WaveState]):
         return WaveState(
             now=now,
             solar_noon=noon,
+            peak=self.peak(today),
             hours_from_noon=hours,
             current=temperature_at(
                 hours, settings.min_temp, settings.max_temp, settings.spread

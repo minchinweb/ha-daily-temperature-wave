@@ -32,6 +32,10 @@ or go to **Settings → Devices & Services → Add Integration** and search for
 "Daily Temperature Wave". You can add it more than once (e.g. one wave per
 room), and change the settings later with **Configure**.
 
+After setup, the integration doesn't appear under **Integrations**, because it's a
+service rather than a device. Find it under **Settings → Devices & Services**,
+in **Devices** (or **Entities**, filtered by "Daily Temperature Wave").
+
 Requires Home Assistant 2025.2 or newer.
 
 ## Settings
@@ -44,6 +48,7 @@ Configured in the UI; there is no YAML configuration.
 | Minimum temperature   | `20C`   | Reached at solar midnight. Accepts `C` or `F`, e.g. `68F`; a bare number is Celsius.                                                                             |
 | Maximum temperature   | `30C`   | Reached at solar noon.                                                                                                                                           |
 | Peak sharpness        | `1.0`   | The wave's shape. `1.0` is a plain sine wave; higher values (up to 5) give a shorter, sharper warm peak and a longer cool spell; lower values (to 0.2) a broader peak. |
+| Peak offset           | `0`     | Minutes the peak comes after solar noon (negative: before). |
 | Step size             | `1F`    | The stepwise sensors round to this, e.g. `1F` or `0.5C`.                                                                                                         |
 | Step interval         | 30 min  | The stepwise sensors hold each value this long, counted from midnight (30 = changes on the hour and half hour).                                                 |
 | Solar noon override   | (empty) | A fixed time to use instead of solar noon. When empty, solar noon is calculated for each day from your Home Assistant location.                                 |
@@ -59,10 +64,12 @@ With the default name, the entities are:
 | --------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `sensor.daily_temperature_wave_current`             | The wave's temperature now                                            | `solar_noon`, `hours_from_noon`, `rising`                                                           |
 | `sensor.daily_temperature_wave_current_step`        | The stepwise temperature now                                          |                                                                                                     |
-| `sensor.daily_temperature_wave_forecast_24h`        | The temperature at the start of the next hour                         | `forecast`: 24 hourly `{datetime, temperature}`                                                     |
-| `sensor.daily_temperature_wave_forecast_24h_step`   | The stepwise temperature for the next step                            | `forecast`: every step for the next 24 hours, `{datetime, temperature}`; `schedule`: today's changes, `{datetime, time, temperature}` |
-| `sensor.daily_temperature_wave_forecast_7d`         | Today's high                                                          | `forecast`: 7 days of `{date, solar_noon, high, low}`                                               |
-| `sensor.daily_temperature_wave_forecast_7d_step`    | Today's high, rounded to the step                                     | as above, rounded to the step                                                                       |
+| `sensor.daily_temperature_wave_next_hour` | The temperature at the start of the next hour | `forecast`: 24 hourly `{datetime, temperature}` |
+| `sensor.daily_temperature_wave_next_step` | The stepwise temperature for the next step | `forecast`: every step for the next 24 hours, `{datetime, temperature}`; `schedule`: today's changes, `{datetime, time, temperature}` |
+| `sensor.daily_temperature_wave_high_today` | Today's high (the wave's peak) | `forecast`: 7 days of `{date, solar_noon, high, low}` |
+| `sensor.daily_temperature_wave_low_today` | Today's low (the wave's bottom) | `forecast`: 7 days of `{date, solar_noon, high, low}` |
+| `sensor.daily_temperature_wave_high_today_step` | Today's high, rounded to the step | as above, rounded to the step |
+| `sensor.daily_temperature_wave_low_today_step` | Today's low, rounded to the step | as above, rounded to the step |
 | `image.daily_temperature_wave_chart`                | A chart of today's wave (the state is when it was last drawn)         | `points`: today's curve, every 30 minutes, `{datetime, temperature}`                                |
 | `binary_sensor.daily_temperature_wave_rising`       | On from solar midnight to solar noon, while the temperature rises     |                                                                                                     |
 | `binary_sensor.daily_temperature_wave_falling`      | On from solar noon to solar midnight, while the temperature falls     |                                                                                                     |

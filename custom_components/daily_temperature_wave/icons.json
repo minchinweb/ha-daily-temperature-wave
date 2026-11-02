@@ -2,8 +2,7 @@
   "entity": {
     "binary_sensor": {
       "rising": {
-        "default": "mdi:thermometer-chevron-down",
-        "state": { "on": "mdi:thermometer-chevron-up" }
+        "default": "mdi:thermometer-chevron-up"
       },
       "falling": {
         "default": "mdi:thermometer-chevron-up",
@@ -21,10 +20,12 @@
     "sensor": {
       "current": { "default": "mdi:thermometer" },
       "current_step": { "default": "mdi:stairs" },
-      "forecast_24h": { "default": "mdi:chart-bell-curve" },
-      "forecast_24h_step": { "default": "mdi:chart-timeline-variant" },
-      "forecast_7d": { "default": "mdi:calendar-week" },
-      "forecast_7d_step": { "default": "mdi:calendar-week" }
+      "next_hour": { "default": "mdi:chart-bell-curve" },
+      "next_step": { "default": "mdi:chart-timeline-variant" },
+      "high_today": { "default": "mdi:thermometer-high" },
+      "high_today_step": { "default": "mdi:stairs" },
+      "low_today": { "default": "mdi:thermometer-low" },
+      "low_today_step": { "default": "mdi:stairs" }
     },
     "image": {
       "chart": { "default": "mdi:chart-bell-curve-cumulative" }

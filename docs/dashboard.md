@@ -53,7 +53,7 @@ series:
     data_generator: |
       return entity.attributes.points.map(
         (p) => [new Date(p.datetime).getTime(), p.temperature]);
-  - entity: sensor.daily_temperature_wave_forecast_24h_step
+  - entity: sensor.daily_temperature_wave_next_step
     name: Stepped target
     curve: stepline
     stroke_width: 1
@@ -101,7 +101,7 @@ Ecobee, whole degrees and 30 minutes.
 type: markdown
 title: Thermostat schedule
 content: |
-  {% set schedule = state_attr('sensor.daily_temperature_wave_forecast_24h_step', 'schedule') %}
+  {% set schedule = state_attr('sensor.daily_temperature_wave_next_step', 'schedule') %}
   | Time | Target |
   | :--- | -----: |
   {% for step in schedule -%}

@@ -38,10 +38,12 @@ ENTITIES = [
     "image.daily_temperature_wave_chart",
     "sensor.daily_temperature_wave_current",
     "sensor.daily_temperature_wave_current_step",
-    "sensor.daily_temperature_wave_forecast_24h",
-    "sensor.daily_temperature_wave_forecast_24h_step",
-    "sensor.daily_temperature_wave_forecast_7d",
-    "sensor.daily_temperature_wave_forecast_7d_step",
+    "sensor.daily_temperature_wave_next_hour",
+    "sensor.daily_temperature_wave_next_step",
+    "sensor.daily_temperature_wave_high_today",
+    "sensor.daily_temperature_wave_high_today_step",
+    "sensor.daily_temperature_wave_low_today",
+    "sensor.daily_temperature_wave_low_today_step",
 ]
 
 
@@ -147,7 +149,7 @@ async def test_forecasts(
     freezer.move_to(NOON)
     await _setup(hass, config_entry)
 
-    hourly = hass.states.get("sensor.daily_temperature_wave_forecast_24h")
+    hourly = hass.states.get("sensor.daily_temperature_wave_next_hour")
     forecast = hourly.attributes["forecast"]
     assert len(forecast) == 24
     assert forecast[0]["datetime"].startswith("2026-01-15T13:00:00")
@@ -156,10 +158,10 @@ async def test_forecasts(
     # state: the coming hour
     assert float(hourly.state) == pytest.approx(forecast[1]["temperature"], abs=0.05)
 
-    stepped = hass.states.get("sensor.daily_temperature_wave_forecast_24h_step")
+    stepped = hass.states.get("sensor.daily_temperature_wave_next_step")
     assert len(stepped.attributes["forecast"]) == 48  # every 30 minutes
 
-    daily = hass.states.get("sensor.daily_temperature_wave_forecast_7d")
+    daily = hass.states.get("sensor.daily_temperature_wave_high_today")
     days = daily.attributes["forecast"]
     assert len(days) == 7
     assert days[0] == {
@@ -177,9 +179,9 @@ async def test_schedule(
     """Today's change points, midnight to midnight, whatever the time now."""
     freezer.move_to(MORNING)
     await _setup(hass, config_entry)
-    schedule = hass.states.get(
-        "sensor.daily_temperature_wave_forecast_24h_step"
-    ).attributes["schedule"]
+    schedule = hass.states.get("sensor.daily_temperature_wave_next_step").attributes[
+        "schedule"
+    ]
 
     times = [step["time"] for step in schedule]
     temps = [step["temperature"] for step in schedule]
@@ -211,9 +213,9 @@ async def test_us_customary_units(
     current = hass.states.get("sensor.daily_temperature_wave_current")
     assert current.attributes["unit_of_measurement"] == UnitOfTemperature.FAHRENHEIT
     assert float(current.state) == pytest.approx(86.0)
-    forecast = hass.states.get("sensor.daily_temperature_wave_forecast_7d")
+    forecast = hass.states.get("sensor.daily_temperature_wave_high_today")
     assert forecast.attributes["forecast"][0]["low"] == 68.0
-    stepped = hass.states.get("sensor.daily_temperature_wave_forecast_24h_step")
+    stepped = hass.states.get("sensor.daily_temperature_wave_next_step")
     schedule = [step["temperature"] for step in stepped.attributes["schedule"]]
     assert schedule == [round(t) for t in schedule]  # whole °F
     assert max(schedule) == 86.0

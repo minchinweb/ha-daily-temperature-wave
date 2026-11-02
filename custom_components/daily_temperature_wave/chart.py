@@ -5,13 +5,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
+import math
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .coordinator import WaveState
 
-WIDTH = 400
+WIDTH = 400  # the drawing's own coordinates (the viewBox)
 HEIGHT = 200
+SCALE = 3  # the image is this many times the drawing's size
 LEFT, RIGHT, TOP, BOTTOM = 44, 12, 24, 24  # padding around the plot
 # a light card of its own, so the chart reads the same on light and dark themes
 BACKGROUND = "#ffffff"
@@ -55,21 +57,38 @@ def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -
 
     parts = [
         (
-            f'<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" '
-            f'height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}">'
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH * SCALE}" '
+            f'height="{HEIGHT * SCALE}" viewBox="0 0 {WIDTH} {HEIGHT}">'
         ),
         f'<rect width="{WIDTH}" height="{HEIGHT}" rx="8" fill="{BACKGROUND}"/>',
     ]
 
-    # hour grid and labels, every 6 hours
-    for hour in range(0, 25, 6):
+    # hour grid every 3 hours; labels every 6, so they don't crowd
+    for hour in range(0, 25, 3):
         hx = x(hour * day_hours / 24)
-        anchor = "end" if hour == 24 else "middle"  # keep 24:00 inside the edge
         parts.append(
             f'<line x1="{hx}" y1="{TOP}" x2="{hx}" y2="{HEIGHT - BOTTOM}" '
             f'stroke="{GRID_COLOR}" stroke-width="0.5"/>'
-            f'<text x="{hx}" y="{HEIGHT - 8}" text-anchor="{anchor}" {FONT} '
-            f'fill="{TEXT_COLOR}">{hour:02d}:00</text>'
+        )
+        if hour % 6 == 0:
+            anchor = "end" if hour == 24 else "middle"  # keep 24:00 inside the edge
+            parts.append(
+                f'<text x="{hx}" y="{HEIGHT - 8}" text-anchor="{anchor}" {FONT} '
+                f'fill="{TEXT_COLOR}">{hour:02d}:00</text>'
+            )
+    # a line at every whole degree, in the unit shown
+    for degree in range(math.ceil(low), math.floor(high) + 1):
+        dy = y(degree)
+        parts.append(
+            f'<line x1="{LEFT}" y1="{dy}" x2="{WIDTH - RIGHT}" y2="{dy}" '
+            f'stroke="{GRID_COLOR}" stroke-width="0.3"/>'
+        )
+    # a faint line at each change in the schedule (the first is midnight)
+    for change in state.schedule[1:]:
+        cx = x(_hour_of_day(change.moment, midnight))
+        parts.append(
+            f'<line x1="{cx}" y1="{TOP}" x2="{cx}" y2="{HEIGHT - BOTTOM}" '
+            f'stroke="{GRID_COLOR}" stroke-width="0.3"/>'
         )
     # temperature labels: high and low
     for temp in (high, low):
@@ -86,6 +105,16 @@ def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -
         f'<text x="{noon_x}" y="{TOP - 8}" text-anchor="middle" {FONT} '
         f'fill="{TEXT_COLOR}">solar noon {state.solar_noon:%H:%M}</text>'
     )
+
+    # the peak, when the peak offset moves it away from solar noon
+    if state.peak != state.solar_noon:
+        peak_x = x(_hour_of_day(state.peak, midnight))
+        parts.append(
+            f'<line x1="{peak_x}" y1="{TOP}" x2="{peak_x}" y2="{HEIGHT - BOTTOM}" '
+            f'stroke="{CURVE_COLOR}" stroke-dasharray="2,3"/>'
+            f'<text x="{peak_x + 4}" y="{HEIGHT - BOTTOM - 6}" {FONT} '
+            f'fill="{CURVE_COLOR}">peak {state.peak:%H:%M}</text>'
+        )
 
     # the stepped schedule, held to the end of the day
     if steps:
@@ -116,6 +145,8 @@ def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -
     anchor = "end" if now_x > WIDTH - 60 else "start"
     label_x = now_x - 6 if anchor == "end" else now_x + 6
     parts.append(
+        f'<line x1="{now_x}" y1="{TOP}" x2="{now_x}" y2="{HEIGHT - BOTTOM}" '
+        f'stroke="{NOW_COLOR}" stroke-width="0.8" opacity="0.6"/>'
         f'<circle cx="{now_x}" cy="{now_y}" r="4" fill="{NOW_COLOR}"/>'
         f'<text x="{label_x}" y="{max(now_y - 8, TOP + 10)}" text-anchor="{anchor}" '
         f'{FONT} fill="{NOW_COLOR}">{now_temp:.1f}{unit}</text>'

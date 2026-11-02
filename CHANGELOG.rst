@@ -1,6 +1,12 @@
 Changelog
 =========
 
+- :feature:`-` **Breaking** (unreleased, so no migration): the forecast sensors
+  are renamed for what they show: ``next_hour`` and ``next_step`` (was
+  ``forecast_24h`` and ``forecast_24h_step``), and ``high_today`` and
+  ``low_today``, with their step versions (was ``forecast_7d``).
+- :feature:`-` **Peak offset** setting: the peak can come a number of minutes
+  after (or before) solar noon. The default, 0, keeps the peak at solar noon.
 - :feature:`-` Binary sensors for the wave's direction: ``falling`` mirrors
   ``rising``, and ``rising_step`` and ``falling_step`` follow the stepped
   target. The stepped ones are on only in an interval where the target

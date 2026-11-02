@@ -16,6 +16,7 @@ CONF_WAVE_SPREAD = "wave_spread"
 CONF_STEP_RESOLUTION = "step_resolution"
 CONF_STEP_INTERVAL = "step_interval"
 CONF_SOLAR_NOON_OVERRIDE = "solar_noon_override"
+CONF_PEAK_OFFSET = "peak_offset"
 
 # Defaults
 DEFAULT_NAME = "Daily Temperature Wave"
@@ -24,14 +25,17 @@ DEFAULT_MAX_TEMP = "30C"
 DEFAULT_WAVE_SPREAD = 1.0
 DEFAULT_STEP_RESOLUTION = "1F"
 DEFAULT_STEP_INTERVAL = 30  # minutes
+DEFAULT_PEAK_OFFSET = 0  # minutes after solar noon
 
 # Entity keys (also the translation keys, and the suffix of the unique ID)
 SENSOR_CURRENT = "current"
 SENSOR_CURRENT_STEP = "current_step"
-SENSOR_FORECAST_24H = "forecast_24h"
-SENSOR_FORECAST_24H_STEP = "forecast_24h_step"
-SENSOR_FORECAST_7D = "forecast_7d"
-SENSOR_FORECAST_7D_STEP = "forecast_7d_step"
+SENSOR_NEXT_HOUR = "next_hour"
+SENSOR_NEXT_STEP = "next_step"
+SENSOR_HIGH_TODAY = "high_today"
+SENSOR_HIGH_TODAY_STEP = "high_today_step"
+SENSOR_LOW_TODAY = "low_today"
+SENSOR_LOW_TODAY_STEP = "low_today_step"
 BINARY_SENSOR_RISING = "rising"
 BINARY_SENSOR_FALLING = "falling"
 # the stepped target: on only in an interval where it changes

@@ -11,6 +11,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.daily_temperature_wave.constants import (
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
+    CONF_PEAK_OFFSET,
     CONF_SOLAR_NOON_OVERRIDE,
     CONF_STEP_INTERVAL,
     CONF_STEP_RESOLUTION,
@@ -53,6 +54,7 @@ async def test_user_flow_creates_entry(hass: HomeAssistant) -> None:
         CONF_STEP_RESOLUTION: "1F",
         CONF_STEP_INTERVAL: 30,
         CONF_SOLAR_NOON_OVERRIDE: None,
+        CONF_PEAK_OFFSET: 0,
     }
     await hass.async_block_till_done()
     assert hass.states.get("sensor.living_room_current") is not None

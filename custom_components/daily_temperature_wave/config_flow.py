@@ -30,6 +30,7 @@ import voluptuous as vol
 from .constants import (
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
+    CONF_PEAK_OFFSET,
     CONF_SOLAR_NOON_OVERRIDE,
     CONF_STEP_INTERVAL,
     CONF_STEP_RESOLUTION,
@@ -37,6 +38,7 @@ from .constants import (
     DEFAULT_MAX_TEMP,
     DEFAULT_MIN_TEMP,
     DEFAULT_NAME,
+    DEFAULT_PEAK_OFFSET,
     DEFAULT_STEP_INTERVAL,
     DEFAULT_STEP_RESOLUTION,
     DEFAULT_WAVE_SPREAD,
@@ -61,6 +63,15 @@ WAVE_SCHEMA = vol.Schema(
                 min=1,
                 max=240,
                 step=1,
+                unit_of_measurement="min",
+                mode=NumberSelectorMode.BOX,
+            )
+        ),
+        vol.Required(CONF_PEAK_OFFSET, default=DEFAULT_PEAK_OFFSET): NumberSelector(
+            NumberSelectorConfig(
+                min=-720,
+                max=720,
+                step=5,
                 unit_of_measurement="min",
                 mode=NumberSelectorMode.BOX,
             )
@@ -100,6 +111,7 @@ def validate(user_input: dict[str, Any]) -> tuple[dict[str, Any], dict[str, str]
         CONF_WAVE_SPREAD: float(user_input[CONF_WAVE_SPREAD]),
         CONF_STEP_RESOLUTION: user_input[CONF_STEP_RESOLUTION].strip(),
         CONF_STEP_INTERVAL: int(user_input[CONF_STEP_INTERVAL]),
+        CONF_PEAK_OFFSET: int(user_input[CONF_PEAK_OFFSET]),
         # stored even when empty, so clearing it in the options flow sticks
         CONF_SOLAR_NOON_OVERRIDE: user_input.get(CONF_SOLAR_NOON_OVERRIDE) or None,
     }

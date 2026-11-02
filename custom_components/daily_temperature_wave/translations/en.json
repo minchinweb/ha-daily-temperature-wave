@@ -11,6 +11,7 @@
           "wave_spread": "Peak sharpness",
           "step_resolution": "Step size",
           "step_interval": "Step interval",
+          "peak_offset": "Peak offset",
           "solar_noon_override": "Solar noon override"
         },
         "data_description": {
@@ -20,6 +21,7 @@
           "wave_spread": "1.0 is a plain sine wave. Higher values give a shorter, sharper warm peak; lower values a broader one.",
           "step_resolution": "The stepped sensors round to this, e.g. `1F` or `0.5C`.",
           "step_interval": "The stepped sensors hold each value this long, starting from midnight (e.g. 30 = on the hour and half hour).",
+          "peak_offset": "Minutes the peak comes after solar noon (negative: before). 0 peaks at solar noon.",
           "solar_noon_override": "Leave empty to calculate solar noon from your Home Assistant location."
         }
       }
@@ -40,6 +42,7 @@
           "wave_spread": "Peak sharpness",
           "step_resolution": "Step size",
           "step_interval": "Step interval",
+          "peak_offset": "Peak offset",
           "solar_noon_override": "Solar noon override"
         },
         "data_description": {
@@ -48,6 +51,7 @@
           "wave_spread": "1.0 is a plain sine wave. Higher values give a shorter, sharper warm peak; lower values a broader one.",
           "step_resolution": "The stepped sensors round to this, e.g. `1F` or `0.5C`.",
           "step_interval": "The stepped sensors hold each value this long, starting from midnight (e.g. 30 = on the hour and half hour).",
+          "peak_offset": "Minutes the peak comes after solar noon (negative: before). 0 peaks at solar noon.",
           "solar_noon_override": "Leave empty to calculate solar noon from your Home Assistant location."
         }
       }
@@ -80,17 +84,23 @@
       "current_step": {
         "name": "Current (step)"
       },
-      "forecast_24h": {
-        "name": "Forecast 24h"
+      "next_hour": {
+        "name": "Next hour"
       },
-      "forecast_24h_step": {
-        "name": "Forecast 24h (step)"
+      "next_step": {
+        "name": "Next step"
       },
-      "forecast_7d": {
-        "name": "Forecast 7d"
+      "high_today": {
+        "name": "High today"
       },
-      "forecast_7d_step": {
-        "name": "Forecast 7d (step)"
+      "high_today_step": {
+        "name": "High today (step)"
+      },
+      "low_today": {
+        "name": "Low today"
+      },
+      "low_today_step": {
+        "name": "Low today (step)"
       }
     },
     "image": {

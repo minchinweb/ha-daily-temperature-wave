@@ -53,6 +53,8 @@ Configured in the UI; there is no YAML configuration.
 | Step interval         | 30 min  | The stepwise sensors hold each value this long, counted from midnight (30 = changes on the hour and half hour).                                                 |
 | Solar noon override   | (empty) | A fixed time to use instead of solar noon. When empty, solar noon is calculated for each day from your Home Assistant location.                                 |
 
+Sample charts for a range of peak sharpness values are in [docs/peak-sharpness.md](docs/peak-sharpness.md).
+
 Temperatures are shown in your Home Assistant unit system (Settings → System →
 General), whatever unit you typed them in.
 

@@ -15,6 +15,7 @@ WIDTH = 400  # the drawing's own coordinates (the viewBox)
 HEIGHT = 200
 SCALE = 3  # the image is this many times the drawing's size
 LEFT, RIGHT, TOP, BOTTOM = 44, 12, 24, 24  # padding around the plot
+RIGHT_WITH_AXIS = 44  # room for a second temperature axis on the right
 # a light card of its own, so the chart reads the same on light and dark themes
 BACKGROUND = "#ffffff"
 CURVE_COLOR = "#3498db"
@@ -38,13 +39,22 @@ def _labelled_temps(low: float, high: float) -> list[float]:
     return [first + i * step for i in range(max(count, 0))]
 
 
-def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -> str:
+def render_svg(
+    state: WaveState,
+    convert: Callable[[float], float],
+    unit: str,
+    second: tuple[Callable[[float], float], Callable[[float], float], str]
+    | None = None,
+) -> str:
     """Draw today (midnight to midnight): the wave, its steps, solar noon and now.
 
     Args:
         state: The coordinator's latest calculation.
         convert: Celsius to the unit to label the chart in.
         unit: That unit's symbol, e.g. ``"°C"``.
+        second: For a wave typed in another unit: Celsius to that unit, that
+            unit back to Celsius, and its symbol. It gets its own axis on the
+            right, so both units show.
 
     Returns:
         A standalone SVG document.
@@ -56,7 +66,8 @@ def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -
     low = min(*temps, *(t for _, t in steps))
     high = max(*temps, *(t for _, t in steps))
     span = (high - low) or 1.0
-    plot_w, plot_h = WIDTH - LEFT - RIGHT, HEIGHT - TOP - BOTTOM
+    right = RIGHT_WITH_AXIS if second else RIGHT
+    plot_w, plot_h = WIDTH - LEFT - right, HEIGHT - TOP - BOTTOM
 
     def x(hour: float) -> float:
         return round(LEFT + plot_w * hour / day_hours, 1)
@@ -93,7 +104,7 @@ def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -
     for degree in range(math.ceil(low), math.floor(high) + 1):
         dy = y(degree)
         parts.append(
-            f'<line x1="{LEFT}" y1="{dy}" x2="{WIDTH - RIGHT}" y2="{dy}" '
+            f'<line x1="{LEFT}" y1="{dy}" x2="{WIDTH - right}" y2="{dy}" '
             f'stroke="{GRID_COLOR}" stroke-width="0.3"/>'
         )
     # a faint line at each change in the schedule (the first is midnight)
@@ -112,6 +123,21 @@ def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -
             f'<text x="{LEFT - 7}" y="{ty + 4}" text-anchor="end" {FONT} '
             f'fill="{TEXT_COLOR}">{temp:g}{unit}</text>'
         )
+
+    # the second axis, on the right, at the same heights
+    if second:
+        to_second, to_celsius, second_unit = second
+        celsius = [p.temperature for p in state.curve] + [
+            p.temperature for p in state.schedule
+        ]
+        for value in _labelled_temps(to_second(min(celsius)), to_second(max(celsius))):
+            sy = y(convert(to_celsius(value)))
+            parts.append(
+                f'<line x1="{WIDTH - right}" y1="{sy}" x2="{WIDTH - right + 4}" '
+                f'y2="{sy}" stroke="{TEXT_COLOR}" stroke-width="0.8"/>'
+                f'<text x="{WIDTH - right + 7}" y="{sy + 4}" {FONT} '
+                f'fill="{TEXT_COLOR}">{value:g}{second_unit}</text>'
+            )
 
     # solar noon
     noon_x = x(_hour_of_day(state.solar_noon, midnight))

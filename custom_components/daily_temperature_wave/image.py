@@ -68,8 +68,24 @@ class DailyTemperatureWaveChart(DailyTemperatureWaveEntity, ImageEntity):
         """The chart, drawn from the latest calculation."""
         unit = self.hass.config.units.temperature_unit
         return render_svg(
-            self.coordinator.data, self.display_temperature, unit
+            self.coordinator.data,
+            self.display_temperature,
+            unit,
+            self._second_axis(unit),
         ).encode()
+
+    def _second_axis(self, unit: str) -> tuple | None:
+        """The wave's own unit, if it was typed in a different one."""
+        entered = self.coordinator.settings.entered_unit
+        if f"°{entered}" == unit:
+            return None
+        if entered == "F":
+            return (
+                lambda c: c * 9 / 5 + 32,
+                lambda f: (f - 32) * 5 / 9,
+                "°F",
+            )
+        return (lambda c: c, lambda c: c, "°C")
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:

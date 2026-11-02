@@ -78,6 +78,7 @@ async def test_chart_in_fahrenheit(
     assert hass.states.get(CHART).attributes["points"][0]["temperature"] > 60
     svg = await _fetch(hass, hass_client_no_auth)
     assert "86°F" in svg
+    assert "20°C" in svg  # the wave was typed in Celsius, so both units show
     assert "68°F" in svg
 
 

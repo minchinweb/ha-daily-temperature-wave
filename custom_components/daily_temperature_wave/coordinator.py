@@ -39,6 +39,7 @@ from .wave import (
     is_falling,
     is_rising,
     parse_step,
+    parse_temperature,
     parse_temperature_celsius,
     round_to_step,
     temperature_at,
@@ -76,6 +77,7 @@ class WaveSettings:
     step_unit: str
     step_interval: int  # minutes
     solar_noon_override: time | None
+    entered_unit: str  # "C" or "F": the unit the minimum was typed in
     peak_offset: timedelta  # the peak is this long after solar noon
 
     @classmethod
@@ -100,6 +102,9 @@ class WaveSettings:
             step_unit=step_unit,
             step_interval=int(options.get(CONF_STEP_INTERVAL, DEFAULT_STEP_INTERVAL)),
             solar_noon_override=parse_time(options.get(CONF_SOLAR_NOON_OVERRIDE)),
+            entered_unit=parse_temperature(
+                options.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP)
+            )[1],
             peak_offset=timedelta(
                 minutes=float(options.get(CONF_PEAK_OFFSET, DEFAULT_PEAK_OFFSET) or 0)
             ),

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, time, timedelta
 import math
 from typing import TYPE_CHECKING
 
@@ -28,6 +28,16 @@ FONT = 'font-family="sans-serif" font-size="11"'
 
 def _hour_of_day(moment: datetime, midnight: datetime) -> float:
     return (moment.timestamp() - midnight.timestamp()) / 3600
+
+
+def _wall_hour(midnight: datetime, hour: int) -> datetime:
+    """The moment at wall-clock ``hour`` (0-24) on the day starting ``midnight``.
+
+    On a daylight saving change day the day is 23 or 25 hours long, so the
+    hour is not always ``hour`` hours after midnight.
+    """
+    day = midnight.date() + timedelta(days=hour // 24)
+    return datetime.combine(day, time(hour % 24), tzinfo=midnight.tzinfo)
 
 
 def _labelled_temps(low: float, high: float) -> list[float]:
@@ -85,7 +95,7 @@ def render_svg(
 
     # hour grid every 3 hours; labels every 6, so they don't crowd
     for hour in range(0, 25, 3):
-        hx = x(hour * day_hours / 24)
+        hx = x(_hour_of_day(_wall_hour(midnight, hour), midnight))
         parts.append(
             f'<line x1="{hx}" y1="{TOP}" x2="{hx}" y2="{HEIGHT - BOTTOM}" '
             f'stroke="{GRID_COLOR}" stroke-width="0.5"/>'

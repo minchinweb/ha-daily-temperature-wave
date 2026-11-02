@@ -29,6 +29,15 @@ def _hour_of_day(moment: datetime, midnight: datetime) -> float:
     return (moment.timestamp() - midnight.timestamp()) / 3600
 
 
+def _labelled_temps(low: float, high: float) -> list[float]:
+    """Round temperatures in ``low``..``high``, every nice step (at most ~10)."""
+    span = high - low
+    step = next((s for s in (1, 2, 5, 10, 20, 50) if span / s <= 10), 50)
+    first = math.ceil(low / step) * step
+    count = math.floor(high / step) - math.ceil(low / step) + 1
+    return [first + i * step for i in range(max(count, 0))]
+
+
 def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -> str:
     """Draw today (midnight to midnight): the wave, its steps, solar noon and now.
 
@@ -69,6 +78,10 @@ def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -
         parts.append(
             f'<line x1="{hx}" y1="{TOP}" x2="{hx}" y2="{HEIGHT - BOTTOM}" '
             f'stroke="{GRID_COLOR}" stroke-width="0.5"/>'
+            # a tick just outside the bottom edge
+            f'<line x1="{hx}" y1="{HEIGHT - BOTTOM}" x2="{hx}" '
+            f'y2="{HEIGHT - BOTTOM + 4}" '
+            f'stroke="{TEXT_COLOR}" stroke-width="0.8"/>'
         )
         if hour % 6 == 0:
             anchor = "end" if hour == 24 else "middle"  # keep 24:00 inside the edge
@@ -90,11 +103,14 @@ def render_svg(state: WaveState, convert: Callable[[float], float], unit: str) -
             f'<line x1="{cx}" y1="{TOP}" x2="{cx}" y2="{HEIGHT - BOTTOM}" '
             f'stroke="{GRID_COLOR}" stroke-width="0.3"/>'
         )
-    # temperature labels: high and low
-    for temp in (high, low):
+    # temperature labels on the left, every nice step, with a tick outside
+    for temp in _labelled_temps(low, high):
+        ty = y(temp)
         parts.append(
-            f'<text x="{LEFT - 4}" y="{y(temp) + 4}" text-anchor="end" {FONT} '
-            f'fill="{TEXT_COLOR}">{temp:.1f}{unit}</text>'
+            f'<line x1="{LEFT - 4}" y1="{ty}" x2="{LEFT}" y2="{ty}" '
+            f'stroke="{TEXT_COLOR}" stroke-width="0.8"/>'
+            f'<text x="{LEFT - 7}" y="{ty + 4}" text-anchor="end" {FONT} '
+            f'fill="{TEXT_COLOR}">{temp:g}{unit}</text>'
         )
 
     # solar noon

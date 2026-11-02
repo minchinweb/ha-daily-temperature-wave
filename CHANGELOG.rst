@@ -1,10 +1,15 @@
 Changelog
 =========
 
-- :feature:`-` **Breaking** (unreleased, so no migration): the forecast sensors
-  are renamed for what they show: ``next_hour`` and ``next_step`` (was
-  ``forecast_24h`` and ``forecast_24h_step``), and ``high_today`` and
-  ``low_today``, with their step versions (was ``forecast_7d``).
+- :release:`2.0.1 <2026-11-01>`
+- :bug:`-` The chart's hour labels and grid lines line up on daylight saving
+  change days, when the day is 23 or 25 hours long.
+
+- :release:`2.0.0 <2026-11-01>`
+- :feature:`-` **Breaking**: the forecast sensors are renamed for what they
+  show: ``next_hour`` and ``next_step`` (was ``forecast_24h`` and
+  ``forecast_24h_step``), and ``high_today`` and ``low_today``, with their step
+  versions (was ``forecast_7d``).
 - :feature:`-` **Peak offset** setting: the peak can come a number of minutes
   after (or before) solar noon. The default, 0, keeps the peak at solar noon.
 - :feature:`-` Binary sensors for the wave's direction: ``falling`` mirrors
@@ -49,11 +54,15 @@ Changelog
 - :support:`-` Tests use ``pytest-homeassistant-custom-component`` and test
   the integration itself; the project follows MinchinWeb's Python style
   guide (ruff, uv, invoke).
+- :feature:`-` The chart is drawn at three times its size, with grid lines every
+  3 hours and every whole degree, a line at each schedule change, tick marks
+  on both axes, labelled temperatures, a "now" line, and a peak line when the
+  peak offset moves it.
+- :feature:`-` When the wave is typed in a different unit from Home Assistant's,
+  the chart shows that unit on a second axis.
+- :support:`-` ``docs/peak-sharpness.md`` shows sample charts for peak sharpness
+  values from 0.2 to 5.0.
 
-- :bug:`-` The chart's hour labels and grid lines line up on daylight saving
-  change days, when the day is 23 or 25 hours long.
-- :release:`2.0.1 <2026-11-01>`
-- :release:`2.0.0 <2026-11-01>`
 - :release:`1.0.0 <2025-12-24>`
 - :feature:`-` Initial release: sine-wave temperature sensors (current,
   stepwise, 24-hour and 7-day forecasts, visualisation data), configurable

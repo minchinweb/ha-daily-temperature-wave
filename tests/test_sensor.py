@@ -1,154 +1,253 @@
+# Copyright (c) 2025 William Minchin
+"""The sensors and binary sensor, set up through a config entry.
+
+The `hass` fixture is in US/Pacific; the entry fixes solar noon at 13:00.
 """
-Unit tests for the Daily Temperature Wave sensors.
-"""
 
-import json
-import unittest
-from datetime import datetime, time
-from unittest.mock import MagicMock, patch
+from __future__ import annotations
 
-from custom_components.daily_temperature_wave.const import (
-    SENSOR_CURRENT,
-    SENSOR_CURRENT_STEP,
-    SENSOR_FORECAST_7D,
-    SENSOR_FORECAST_24H,
-    SENSOR_VISUAL,
-)
-from custom_components.daily_temperature_wave.sensor import (
-    SENSOR_DESCRIPTIONS,
-    DailyTemperatureWaveSensor,
+from datetime import timedelta
+from itertools import pairwise
+
+from freezegun.api import FrozenDateTimeFactory
+from homeassistant.config_entries import ConfigEntryState
+from homeassistant.const import UnitOfTemperature
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
+from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
+import pytest
+from pytest_homeassistant_custom_component.common import (
+    MockConfigEntry,
+    async_fire_time_changed,
 )
 
+from custom_components.daily_temperature_wave.constants import (
+    CONF_SOLAR_NOON_OVERRIDE,
+)
 
-class TestDailyTemperatureWaveSensor(unittest.TestCase):
-    """Test Daily Temperature Wave sensor functionality."""
+# 13:00 PST, solar noon
+NOON = "2026-01-15 21:00:00+00:00"
+# 07:10 PST: 5h50m before noon; the 30-minute step started at 07:00
+MORNING = "2026-01-15 15:10:00+00:00"
 
-    def setUp(self):
-        """Set up test fixtures."""
-        # Create a mock config entry
-        self.mock_config_entry = MagicMock()
-        self.mock_config_entry.entry_id = "test_entry"
-        self.mock_config_entry.data = {
-            "min_temp": "20C",
-            "max_temp": "30C",
-            "wave_spread": 1.0,
-            "step_resolution": "1F",
-            "step_interval": 30,
-            "unit_system": "metric",
-            "solar_noon_override": None,
-        }
-        self.mock_config_entry.options = {}
-
-    def test_sensor_descriptions(self):
-        """Test that all sensor descriptions are defined."""
-        self.assertEqual(len(SENSOR_DESCRIPTIONS), 7)
-
-        # Check that all expected sensors are present
-        sensor_keys = [desc.key for desc in SENSOR_DESCRIPTIONS]
-        self.assertIn(SENSOR_CURRENT, sensor_keys)
-        self.assertIn(SENSOR_CURRENT_STEP, sensor_keys)
-        self.assertIn(SENSOR_FORECAST_24H, sensor_keys)
-        self.assertIn(SENSOR_FORECAST_7D, sensor_keys)
-        self.assertIn(SENSOR_VISUAL, sensor_keys)
-
-    def test_sensor_initialization(self):
-        """Test sensor initialization."""
-        # Test current temperature sensor
-        current_sensor = DailyTemperatureWaveSensor(
-            self.mock_config_entry, SENSOR_DESCRIPTIONS[0]  # SENSOR_CURRENT
-        )
-
-        self.assertEqual(current_sensor._attr_name, "Daily Temperature Wave Current")
-        self.assertEqual(current_sensor._attr_unique_id, "test_entry_current")
-        self.assertEqual(current_sensor._min_temp_c, 20.0)
-        self.assertEqual(current_sensor._max_temp_c, 30.0)
-        self.assertEqual(current_sensor._wave_spread, 1.0)
-        self.assertEqual(current_sensor._unit_system, "metric")
-
-    @patch("custom_components.daily_temperature_wave.sensor.get_solar_noon")
-    @patch("custom_components.daily_temperature_wave.sensor.get_current_solar_position")
-    def test_current_temperature_calculation(
-        self, mock_solar_position, mock_solar_noon
-    ):
-        """Test current temperature calculation."""
-        # Mock solar noon and position
-        mock_solar_noon.return_value = time(12, 0)
-        mock_solar_position.return_value = 0.0  # At solar noon
-
-        # Create sensor
-        sensor = DailyTemperatureWaveSensor(
-            self.mock_config_entry, SENSOR_DESCRIPTIONS[0]  # SENSOR_CURRENT
-        )
-
-        # Mock hass
-        sensor.hass = MagicMock()
-
-        # Calculate temperature (should be max temp at solar noon)
-        temp = sensor._calculate_current_temperature(sensor.hass, time(12, 0))
-
-        # Should be close to max temp (30°C)
-        self.assertAlmostEqual(temp, 30.0, places=1)
-
-    @patch("custom_components.daily_temperature_wave.sensor.get_solar_noon")
-    @patch("custom_components.daily_temperature_wave.sensor.get_current_solar_position")
-    def test_forecast_generation(self, mock_solar_position, mock_solar_noon):
-        """Test forecast generation."""
-        # Mock solar noon and position
-        mock_solar_noon.return_value = time(12, 0)
-        mock_solar_position.return_value = 0.0
-
-        # Create 24h forecast sensor
-        sensor = DailyTemperatureWaveSensor(
-            self.mock_config_entry, SENSOR_DESCRIPTIONS[2]  # SENSOR_FORECAST_24H
-        )
-
-        # Mock hass
-        sensor.hass = MagicMock()
-        sensor.hass.config.time_zone = None
-
-        # Generate forecast
-        forecast = sensor._generate_24h_forecast(sensor.hass, time(12, 0))
-
-        # Check forecast structure
-        self.assertEqual(len(forecast), 24)
-
-        # Check first forecast item structure
-        first_item = forecast[0]
-        self.assertIn("time", first_item)
-        self.assertIn("temperature", first_item)
-        self.assertIn("hours_from_noon", first_item)
-
-    def test_visual_data_generation(self):
-        """Test visual data generation."""
-        # Create visual sensor
-        sensor = DailyTemperatureWaveSensor(
-            self.mock_config_entry, SENSOR_DESCRIPTIONS[6]  # SENSOR_VISUAL
-        )
-
-        # Mock hass and solar noon
-        sensor.hass = MagicMock()
-        sensor.hass.config.time_zone = None
-
-        # Generate visual data
-        visual_data = sensor._generate_visual_data(sensor.hass, time(12, 0))
-
-        # Check visual data structure
-        self.assertIn("points", visual_data)
-        self.assertIn("current_position", visual_data)
-        self.assertIn("solar_noon", visual_data)
-        self.assertIn("temperature_range", visual_data)
-
-        # Check points
-        points = visual_data["points"]
-        self.assertEqual(len(points), 25)  # 25 points for 24 hours
-
-        # Check current position
-        current_pos = visual_data["current_position"]
-        self.assertIn("x", current_pos)
-        self.assertIn("y", current_pos)
-        self.assertIn("temp", current_pos)
-        self.assertIn("hours_from_noon", current_pos)
+ENTITIES = [
+    "binary_sensor.daily_temperature_wave_falling",
+    "binary_sensor.daily_temperature_wave_falling_step",
+    "binary_sensor.daily_temperature_wave_rising",
+    "binary_sensor.daily_temperature_wave_rising_step",
+    "image.daily_temperature_wave_chart",
+    "sensor.daily_temperature_wave_current",
+    "sensor.daily_temperature_wave_current_step",
+    "sensor.daily_temperature_wave_forecast_24h",
+    "sensor.daily_temperature_wave_forecast_24h_step",
+    "sensor.daily_temperature_wave_forecast_7d",
+    "sensor.daily_temperature_wave_forecast_7d_step",
+]
 
 
-if __name__ == "__main__":
-    unittest.main()
+async def _setup(hass: HomeAssistant, entry: MockConfigEntry) -> None:
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+
+
+def _temp(hass: HomeAssistant, entity_id: str) -> float:
+    return float(hass.states.get(entity_id).state)
+
+
+async def test_entities_created(
+    hass: HomeAssistant,
+    config_entry: MockConfigEntry,
+    entity_registry: er.EntityRegistry,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass, config_entry)
+    for entity_id in ENTITIES:
+        entry = entity_registry.async_get(entity_id)
+        assert entry is not None, entity_id
+        assert entry.unique_id.startswith(config_entry.entry_id)
+        assert hass.states.get(entity_id).state not in ("unknown", "unavailable")
+
+
+async def test_peak_at_solar_noon(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass, config_entry)
+
+    current = hass.states.get("sensor.daily_temperature_wave_current")
+    assert float(current.state) == pytest.approx(30.0)
+    assert current.attributes["unit_of_measurement"] == UnitOfTemperature.CELSIUS
+    assert current.attributes["device_class"] == "temperature"
+    assert current.attributes["hours_from_noon"] == 0
+    assert current.attributes["solar_noon"].startswith("2026-01-15T13:00:00")
+    assert _temp(hass, "sensor.daily_temperature_wave_current_step") == 30.0
+    assert hass.states.get("binary_sensor.daily_temperature_wave_rising").state == "off"
+
+
+async def test_morning(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    freezer.move_to(MORNING)
+    await _setup(hass, config_entry)
+
+    # a little over the midpoint (25 °C at 07:00)
+    assert 25 < _temp(hass, "sensor.daily_temperature_wave_current") < 25.5
+    # held at the 07:00 value, 25 °C = 77 °F, already on a 1 °F step
+    assert _temp(hass, "sensor.daily_temperature_wave_current_step") == 25.0
+    assert hass.states.get("binary_sensor.daily_temperature_wave_rising").state == "on"
+
+
+async def test_stepped_direction_is_off_on_the_flats(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    # 02:00 PST, near the trough: the target is 68 °F from 01:30 to 02:00
+    freezer.move_to("2026-01-15 10:00:00+00:00")
+    await _setup(hass, config_entry)
+    states = hass.states
+    assert states.get("binary_sensor.daily_temperature_wave_rising").state == "on"
+    assert states.get("binary_sensor.daily_temperature_wave_falling").state == "off"
+    assert states.get("binary_sensor.daily_temperature_wave_rising_step").state == "off"
+    assert (
+        states.get("binary_sensor.daily_temperature_wave_falling_step").state == "off"
+    )
+
+
+async def test_stepped_direction_follows_a_change(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    # 16:00 PST: the target steps down from 84 °F to 83 °F at 16:00
+    freezer.move_to("2026-01-16 00:00:00+00:00")
+    await _setup(hass, config_entry)
+    states = hass.states
+    assert states.get("binary_sensor.daily_temperature_wave_falling").state == "on"
+    assert states.get("binary_sensor.daily_temperature_wave_falling_step").state == "on"
+    assert states.get("binary_sensor.daily_temperature_wave_rising_step").state == "off"
+
+
+async def test_updates_every_minute(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    freezer.move_to(MORNING)
+    await _setup(hass, config_entry)
+    before = _temp(hass, "sensor.daily_temperature_wave_current")
+
+    freezer.tick(timedelta(hours=2))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+
+    assert _temp(hass, "sensor.daily_temperature_wave_current") > before
+
+
+async def test_forecasts(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass, config_entry)
+
+    hourly = hass.states.get("sensor.daily_temperature_wave_forecast_24h")
+    forecast = hourly.attributes["forecast"]
+    assert len(forecast) == 24
+    assert forecast[0]["datetime"].startswith("2026-01-15T13:00:00")
+    assert forecast[0]["temperature"] == 30.0
+    assert forecast[12]["temperature"] == 20.0  # solar midnight
+    # state: the coming hour
+    assert float(hourly.state) == pytest.approx(forecast[1]["temperature"], abs=0.05)
+
+    stepped = hass.states.get("sensor.daily_temperature_wave_forecast_24h_step")
+    assert len(stepped.attributes["forecast"]) == 48  # every 30 minutes
+
+    daily = hass.states.get("sensor.daily_temperature_wave_forecast_7d")
+    days = daily.attributes["forecast"]
+    assert len(days) == 7
+    assert days[0] == {
+        "date": "2026-01-15",
+        "solar_noon": "2026-01-15T13:00:00-08:00",
+        "high": 30.0,
+        "low": 20.0,
+    }
+    assert float(daily.state) == 30.0
+
+
+async def test_schedule(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    """Today's change points, midnight to midnight, whatever the time now."""
+    freezer.move_to(MORNING)
+    await _setup(hass, config_entry)
+    schedule = hass.states.get(
+        "sensor.daily_temperature_wave_forecast_24h_step"
+    ).attributes["schedule"]
+
+    times = [step["time"] for step in schedule]
+    temps = [step["temperature"] for step in schedule]
+    assert times[0] == "00:00"
+    assert times == sorted(times)
+    assert all(t[-2:] in ("00", "30") for t in times)  # on the step interval
+    assert all(a != b for a, b in pairwise(temps))  # only changes
+    # 20-30 °C in 1 °F steps: 68-86 °F, up to noon and back down; where the
+    # wave climbs over 1 °F per half hour, some degrees are skipped
+    assert (min(temps), max(temps)) == (20.0, 30.0)
+    assert 10 < len(set(temps)) <= 19
+    assert 13 * 60 >= _minutes(times[temps.index(30.0)]) >= 12 * 60
+    assert temps[times.index("07:00")] == 25.0
+    assert schedule[0]["datetime"] == "2026-01-15T00:00:00-08:00"
+
+
+def _minutes(hh_mm: str) -> int:
+    hours, minutes = hh_mm.split(":")
+    return int(hours) * 60 + int(minutes)
+
+
+async def test_us_customary_units(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    hass.config.units = US_CUSTOMARY_SYSTEM
+    freezer.move_to(NOON)
+    await _setup(hass, config_entry)
+
+    current = hass.states.get("sensor.daily_temperature_wave_current")
+    assert current.attributes["unit_of_measurement"] == UnitOfTemperature.FAHRENHEIT
+    assert float(current.state) == pytest.approx(86.0)
+    forecast = hass.states.get("sensor.daily_temperature_wave_forecast_7d")
+    assert forecast.attributes["forecast"][0]["low"] == 68.0
+    stepped = hass.states.get("sensor.daily_temperature_wave_forecast_24h_step")
+    schedule = [step["temperature"] for step in stepped.attributes["schedule"]]
+    assert schedule == [round(t) for t in schedule]  # whole °F
+    assert max(schedule) == 86.0
+
+
+@pytest.mark.parametrize("options", [{CONF_SOLAR_NOON_OVERRIDE: None}])
+async def test_solar_noon_from_location(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    """Without an override, solar noon comes from the configured location."""
+    freezer.move_to(NOON)
+    await _setup(hass, config_entry)
+    noon = hass.states.get("sensor.daily_temperature_wave_current").attributes[
+        "solar_noon"
+    ]
+    # San Diego (the test location) in January: about 11:58 PST
+    assert noon.startswith("2026-01-15T11:5")
+
+
+@pytest.mark.parametrize("options", [{"min_temp": "hot"}])
+async def test_bad_options_fail_setup(
+    hass: HomeAssistant, config_entry: MockConfigEntry
+) -> None:
+    config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert config_entry.state is ConfigEntryState.SETUP_ERROR
+
+
+async def test_unload(
+    hass: HomeAssistant, config_entry: MockConfigEntry, freezer: FrozenDateTimeFactory
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass, config_entry)
+    assert await hass.config_entries.async_unload(config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert config_entry.state is ConfigEntryState.NOT_LOADED

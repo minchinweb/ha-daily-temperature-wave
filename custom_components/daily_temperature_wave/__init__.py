@@ -1,80 +1,55 @@
-"""
-Daily Temperature Wave custom component for Home Assistant.
+# Copyright (c) 2025 William Minchin
+"""Daily Temperature Wave: a target temperature that follows the sun.
 
-This component generates a daily temperature wave using sine wave calculations.
+Sets up one coordinator per config entry; the sensor and binary sensor
+platforms read from it.
 """
+
+from __future__ import annotations
 
 import logging
-from datetime import timedelta
 
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.typing import ConfigType
+from homeassistant.exceptions import ConfigEntryError
 
-from .const import (
-    DEFAULT_MAX_TEMP,
-    DEFAULT_MIN_TEMP,
-    DEFAULT_STEP_INTERVAL,
-    DEFAULT_STEP_RESOLUTION,
-    DEFAULT_UNIT_SYSTEM,
-    DEFAULT_WAVE_SPREAD,
-    DOMAIN,
-    PLATFORMS,
+from .constants import PLATFORMS
+from .coordinator import (
+    DailyTemperatureWaveConfigEntry,
+    DailyTemperatureWaveCoordinator,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Set up the Daily Temperature Wave component."""
-    _LOGGER.debug("Setting up Daily Temperature Wave component")
-
-    # Ensure our domain is set up
-    hass.data.setdefault(DOMAIN, {})
-
-    # Load platforms
-    for platform in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setups(config, platform)
-        )
-
-    return True
-
-
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_setup_entry(
+    hass: HomeAssistant, entry: DailyTemperatureWaveConfigEntry
+) -> bool:
     """Set up Daily Temperature Wave from a config entry."""
-    _LOGGER.debug(
-        "Setting up Daily Temperature Wave from config entry: %s", entry.title
-    )
+    try:
+        coordinator = DailyTemperatureWaveCoordinator(hass, entry)
+    except ValueError as err:
+        # the config flow validates, so only a hand-edited entry gets here
+        raise ConfigEntryError(f"Invalid configuration: {err}") from err
 
-    # Store config entry data
-    hass.data[DOMAIN][entry.entry_id] = {
-        "config": entry.data,
-        "options": entry.options,
-    }
+    await coordinator.async_config_entry_first_refresh()
+    coordinator.async_start()
+    entry.runtime_data = coordinator
 
-    # Set up platforms
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(
+    hass: HomeAssistant, entry: DailyTemperatureWaveConfigEntry
+) -> bool:
     """Unload a config entry."""
-    _LOGGER.debug("Unloading Daily Temperature Wave config entry: %s", entry.title)
-
-    # Unload platforms
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-
-    if unload_ok:
-        # Clean up data
-        hass.data[DOMAIN].pop(entry.entry_id)
-
-    return unload_ok
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
-async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Reload config entry."""
-    _LOGGER.debug("Reloading Daily Temperature Wave config entry: %s", entry.title)
-    await async_unload_entry(hass, entry)
-    await async_setup_entry(hass, entry)
+async def _async_options_updated(
+    hass: HomeAssistant, entry: DailyTemperatureWaveConfigEntry
+) -> None:
+    """Reload, so new options take effect."""
+    _LOGGER.debug("Options changed for %s; reloading", entry.title)
+    await hass.config_entries.async_reload(entry.entry_id)

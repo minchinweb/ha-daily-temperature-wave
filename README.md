@@ -1,235 +1,141 @@
-# Daily Temperature Wave - Home Assistant Custom Component
+# Daily Temperature Wave for Home Assistant
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/minchinweb/ha-daily-temperature-wave)
 ![GitHub last commit](https://img.shields.io/github/last-commit/minchinweb/ha-daily-temperature-wave)
 ![License](https://img.shields.io/github/license/minchinweb/ha-daily-temperature-wave)
-![GitHub Actions](https://github.com/minchinweb/ha-daily-temperature-wave/actions/workflows/python-package.yml/badge.svg)
+[![Test](https://github.com/minchinweb/ha-daily-temperature-wave/actions/workflows/test.yml/badge.svg)](https://github.com/minchinweb/ha-daily-temperature-wave/actions/workflows/test.yml)
+[![Validate](https://github.com/minchinweb/ha-daily-temperature-wave/actions/workflows/validate.yml/badge.svg)](https://github.com/minchinweb/ha-daily-temperature-wave/actions/workflows/validate.yml)
 
-Provides a Daily Temperature (sine) Wave as a custom Home Assistant component.
-Can be used as a heating/cooling target.
+A target temperature that follows the sun, for use as a heating or cooling
+setpoint. It peaks at **solar noon** (which can be an hour and a half or more
+from "wall clock" noon) and bottoms out at solar midnight, following a smooth
+daily (sine) wave between the minimum and maximum you choose.
 
-By default, the temperature will peak at solar noon (which can be 1 1/2 or more
-from "wall clock" noon). Also provides a "step wise" version that can be used
-in lower resolution settings (e.g. setting up an Ecobee schedule, which only
-lets you set temperatures for each 1/2 hour, and only in 1&deg;F resolution).
-
-Sensors include:
-
-- current temperature
-- rising/failing "switch"
-- 24-hour and 7-day "forecasts"
+There is also a **stepwise** version for thermostats with coarse schedules:
+for example, an Ecobee schedule that only takes a temperature every half hour,
+in whole degrees Fahrenheit.
 
 ## Installation
 
-Add as a custom repo in HACS:
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=minchinweb&repository=ha-daily-temperature-wave&category=integration)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=minchinweb&repository=ha-daily-temperature-wave)
+Or by hand: in HACS, add `https://github.com/minchinweb/ha-daily-temperature-wave`
+as a [custom repository](https://hacs.xyz/docs/faq/custom_repositories/) of
+type "Integration", then search for "Daily Temperature Wave" and download it.
+Restart Home Assistant.
 
-Then search for "Daily Temperature Wave" in HACS and install through HACS.
+Then add the integration:
 
-Finally, add the integration, via Settings --> Devices & Services --> "Add
-Integration" --> Search for "Daily Temperature Wave"
+[![Add integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start?domain=daily_temperature_wave)
 
+or go to **Settings → Devices & Services → Add Integration** and search for
+"Daily Temperature Wave". You can add it more than once (e.g. one wave per
+room), and change the settings later with **Configure**.
 
-## Configuration
+Requires Home Assistant 2025.2 or newer.
 
-It is likely easiest to configure through the Web UI, but a full YAML
-configuration would look like this:
+## Settings
 
-```yaml
-daily_temperature_wave:
-  min_temp: 20C      # Minimum temperature (default: 20°C)
-  max_temp: 30C      # Maximum temperature (default: 30°C)
-  wave_spread: 1.2   # Wave spread factor (default: 1.0)
-  step_resolution: 1F  # Step resolution for stepwise mode (default: 1°F)
-  step_interval: 30   # Step interval in minutes (default: 30)
-  unit_system: metric # Unit system (metric/imperial, default: metric)
-  solar_noon_override: "12:30"  # Optional: Manual solar noon override
-```
+Configured in the UI; there is no YAML configuration.
 
-<!-- rewritten up to here.. -->
+| Setting               | Default | Description                                                                                                                                                      |
+| --------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name                  | Daily Temperature Wave | Names the device and its entities.                                                                                                                |
+| Minimum temperature   | `20C`   | Reached at solar midnight. Accepts `C` or `F`, e.g. `68F`; a bare number is Celsius.                                                                             |
+| Maximum temperature   | `30C`   | Reached at solar noon.                                                                                                                                           |
+| Peak sharpness        | `1.0`   | The wave's shape. `1.0` is a plain sine wave; higher values (up to 5) give a shorter, sharper warm peak and a longer cool spell; lower values (to 0.2) a broader peak. |
+| Step size             | `1F`    | The stepwise sensors round to this, e.g. `1F` or `0.5C`.                                                                                                         |
+| Step interval         | 30 min  | The stepwise sensors hold each value this long, counted from midnight (30 = changes on the hour and half hour).                                                 |
+| Solar noon override   | (empty) | A fixed time to use instead of solar noon. When empty, solar noon is calculated for each day from your Home Assistant location.                                 |
 
-### Configuration Parameters
+Temperatures are shown in your Home Assistant unit system (Settings → System →
+General), whatever unit you typed them in.
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `min_temp` | string | "20C" | Minimum temperature (supports "20C" or "68F" format) |
-| `max_temp` | string | "30C" | Maximum temperature (supports "30C" or "86F" format) |
-| `wave_spread` | float | 1.0 | Controls the slope of the sine wave (1.0 = standard, >1.0 = steeper) |
-| `step_resolution` | string | "1F" | Temperature step size for stepwise mode (supports "1F" or "0.5C") |
-| `step_interval` | int | 30 | Time between step changes in minutes |
-| `unit_system` | string | "metric" | Display unit system ("metric" or "imperial") |
-| `solar_noon_override` | string | None | Manual override for solar noon time (format: "HH:MM") |
+## Entities
 
-## Sensors
+With the default name, the entities are:
 
-The component creates the following sensors:
+| Entity                                              | State                                                                 | Attributes                                                                                          |
+| --------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `sensor.daily_temperature_wave_current`             | The wave's temperature now                                            | `solar_noon`, `hours_from_noon`, `rising`                                                           |
+| `sensor.daily_temperature_wave_current_step`        | The stepwise temperature now                                          |                                                                                                     |
+| `sensor.daily_temperature_wave_forecast_24h`        | The temperature at the start of the next hour                         | `forecast`: 24 hourly `{datetime, temperature}`                                                     |
+| `sensor.daily_temperature_wave_forecast_24h_step`   | The stepwise temperature for the next step                            | `forecast`: every step for the next 24 hours, `{datetime, temperature}`; `schedule`: today's changes, `{datetime, time, temperature}` |
+| `sensor.daily_temperature_wave_forecast_7d`         | Today's high                                                          | `forecast`: 7 days of `{date, solar_noon, high, low}`                                               |
+| `sensor.daily_temperature_wave_forecast_7d_step`    | Today's high, rounded to the step                                     | as above, rounded to the step                                                                       |
+| `image.daily_temperature_wave_chart`                | A chart of today's wave (the state is when it was last drawn)         | `points`: today's curve, every 30 minutes, `{datetime, temperature}`                                |
+| `binary_sensor.daily_temperature_wave_rising`       | On from solar midnight to solar noon, while the temperature rises     |                                                                                                     |
+| `binary_sensor.daily_temperature_wave_falling`      | On from solar noon to solar midnight, while the temperature falls     |                                                                                                     |
+| `binary_sensor.daily_temperature_wave_rising_step`  | On in an interval where the stepped temperature goes up               |                                                                                                     |
+| `binary_sensor.daily_temperature_wave_falling_step` | On in an interval where the stepped temperature goes down             |                                                                                                     |
 
-### Temperature Sensors
+Everything updates at the start of each minute, except the chart, which is
+redrawn every 5 minutes. Forecast, schedule and point attributes are not
+recorded in history.
 
-| Sensor | Description | Unit |
-|--------|-------------|------|
-| `sensor.daily_temperature_wave_current` | Current temperature from sine wave | °C or °F |
-| `sensor.daily_temperature_wave_current_step` | Current temperature with stepwise changes | °C or °F |
+## Dashboards
 
-### Forecast Sensors
+See today's wave, graph it against the temperatures you measure, and list
+the schedule to type into a thermostat:
 
-| Sensor | Description | Format |
-|--------|-------------|--------|
-| `sensor.daily_temperature_wave_forecast_24h` | 24-hour hourly forecast | JSON array |
-| `sensor.daily_temperature_wave_forecast_24h_step` | 24-hour stepwise forecast | JSON array |
-| `sensor.daily_temperature_wave_forecast_7d` | 7-day daily forecast | JSON array |
-| `sensor.daily_temperature_wave_forecast_7d_step` | 7-day stepwise forecast | JSON array |
+- **Chart**: the chart image entity shows today's wave, its steps, solar noon
+  and now in the built-in Picture Entity card, with nothing to install.
 
-### Visualization Sensor
+  ![The chart image: today's wave, the stepped target, solar noon and now](docs/images/chart.png)
 
-| Sensor | Description | Format |
-|--------|-------------|--------|
-| `sensor.daily_temperature_wave_visual` | Temperature curve visualization data | JSON |
+- **Compare with measured temperatures**: the [ApexCharts card](https://github.com/RomRider/apexcharts-card)
+  (from HACS) plots the whole of today's wave, the stepped target and your
+  measured temperature. The built-in History graph card can compare the past
+  24 hours.
+- **Schedule table**: the built-in Markdown card lists the times the stepped
+  temperature changes, e.g. to set up an Ecobee schedule.
 
-### Binary Sensor
+![Sample graph: the target wave, the stepped target and measured temperatures over a day](docs/images/graph.png)
 
-| Sensor | Description | State |
-|--------|-------------|-------|
-| `binary_sensor.daily_temperature_wave_rising` | Indicates if temperature is rising | on/off |
+*A sample, drawn from the wave's formula with made-up readings.*
 
-## Usage Examples
+The card YAML for all of these is in [docs/dashboard.md](docs/dashboard.md).
 
-### Basic Temperature Display
+## Examples
 
-```yaml
-# In your Lovelace UI
-cards:
-  - type: entities
-    entities:
-      - sensor.daily_temperature_wave_current
-      - sensor.daily_temperature_wave_current_step
-      - binary_sensor.daily_temperature_wave_rising
-```
-
-### Temperature Curve Visualization
+Use the wave as a thermostat setpoint:
 
 ```yaml
-# Custom card using the visualization data
-cards:
-  - type: custom:your-custom-card
-    data: >-
-      {{ state_attr('sensor.daily_temperature_wave_visual', 'svg') }}
-```
-
-### Forecast Display
-
-```yaml
-# Display 24-hour forecast
-cards:
-  - type: entities
-    entities:
-      - type: section
-        label: 24-Hour Forecast
-      - type: custom:auto-entities
-        card:
-          type: entities
-        filter:
-          include:
-            - entity_id: sensor.daily_temperature_wave_forecast_24h
-              options:
-                secondary_info: last-changed
-```
-
-## Advanced Configuration
-
-### Wave Spread Examples
-
-- **Standard Wave** (`wave_spread: 1.0`): Normal sine wave with 12-hour period
-- **Steep Wave** (`wave_spread: 1.5`): Steeper slope, narrower peak around solar noon
-- **Gentle Wave** (`wave_spread: 0.7`): Gentler slope, wider temperature range
-
-### Mixed Unit Configuration
-
-```yaml
-daily_temperature_wave:
-  min_temp: 20C      # Celsius for main temperatures
-  max_temp: 30C      # Celsius for main temperatures
-  step_resolution: 1F  # But use Fahrenheit for step resolution
-  unit_system: metric # Display in metric
+automation:
+  - alias: "Follow the temperature wave"
+    triggers:
+      - trigger: state
+        entity_id: sensor.daily_temperature_wave_current_step
+    actions:
+      - action: climate.set_temperature
+        target:
+          entity_id: climate.living_room
+        data:
+          temperature: "{{ states('sensor.daily_temperature_wave_current_step') | float }}"
 ```
 
 ## Troubleshooting
 
-### Solar Noon Detection Issues
+- **Solar noon looks wrong**: check your home location (Settings → System →
+  General → Location), or set the solar noon override.
+- **Logs**: add this to `configuration.yaml` and restart:
 
-If the sun integration is not available, the component automatically falls back to wall clock noon (12:00). You can also manually override:
+  ```yaml
+  logger:
+    logs:
+      custom_components.daily_temperature_wave: debug
+  ```
 
-```yaml
-daily_temperature_wave:
-  solar_noon_override: "12:30"  # Use 12:30 PM as solar noon
-```
+## Contributing
 
-### Temperature Not Updating
-
-- Check that the component is properly installed and configured
-- Verify that Home Assistant has restarted after installation
-- Check the logs for any errors: `Settings → System → Logs`
-
-### Invalid Configuration
-
-If you see configuration errors:
-- Ensure `min_temp` < `max_temp`
-- Use valid temperature formats (e.g., "20C", "68F", or plain numbers)
-- Check that `wave_spread` is between 0.1 and 5.0
-
-## Contribution Hints
-
-### Running Tests Locally
-
-```bash
-# Run unit tests
-python -m unittest tests.test_utils tests.test_sensor
-
-# Run core functionality tests
-python -m unittest tests.test_core
-```
-
-### Code Formatting
-
-This project uses **Black** and **isort** for code formatting:
-
-
-### Pre-commit Hooks
-
-The project includes pre-commit hooks for automated code quality checks:
-
-```bash
-# Install pre-commit hooks
-pip install pre-commit
-pre-commit install
-
-# Run all hooks
-pre-commit run --all-files
-```
-
-## License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for the full license text.
-
-## Support
-
-For issues, questions, or feature requests:
-
-- **GitHub Issues**: [Report bugs](https://github.com/minchinweb/ha-daily-temperature-wave/issues)
-- **Discussions**: [Ask questions](https://github.com/minchinweb/ha-daily-temperature-wave/discussions)
-- **Community Forum**: Home Assistant community forums
+See [docs/development.md](docs/development.md) for the tooling, running the
+tests and trying changes in a real Home Assistant. Bug reports and ideas are
+welcome in the [issues](https://github.com/minchinweb/ha-daily-temperature-wave/issues).
 
 ## Changelog
 
-### v1.0.0 -- 2025-12-24 (Initial Release)
+See [CHANGELOG.rst](CHANGELOG.rst).
 
-- Basic sine wave temperature generation
-- Configurable temperature range
-- WebUI configuration support
-- Multiple sensor types
-- Unit conversion support
+## License
 
----
-
-**Enjoy your Daily Temperature Wave!** 🌡️🌞
+MIT; see [LICENSE.txt](LICENSE.txt).

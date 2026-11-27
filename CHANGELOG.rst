@@ -1,6 +1,10 @@
 Changelog
 =========
 
+- :release:`2.0.2 <2026-11-26>`
+- :bug:`-` The logo is added to the brand folder and shown at the top of the
+  README.
+
 - :release:`2.0.1 <2026-11-01>`
 - :bug:`-` The chart's hour labels and grid lines line up on daylight saving
   change days, when the day is 23 or 25 hours long.

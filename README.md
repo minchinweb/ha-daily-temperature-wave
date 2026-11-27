@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/dark_logo.svg">
+    <img alt="Daily Temperature Wave" src="brand/logo.svg" width="480">
+  </picture>
+</p>
+
 # Daily Temperature Wave for Home Assistant
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/minchinweb/ha-daily-temperature-wave)

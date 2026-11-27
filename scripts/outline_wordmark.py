@@ -70,7 +70,7 @@ def main() -> None:
         )
         text = re.sub(
             r'<path id="[^"]*" fill="[^"]+" d="[^"]*"/>',
-            lambda _: f'<path id="wordmark" fill="{fill}" d="{commands}"/>',
+            lambda _, fill=fill: f'<path id="wordmark" fill="{fill}" d="{commands}"/>',
             text,
             count=1,
         )
